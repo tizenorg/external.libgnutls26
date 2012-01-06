@@ -1,0 +1,41 @@
+From e8df5a70b7ee05e7f835348350e06533732d05aa Mon Sep 17 00:00:00 2001
+From: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+Date: Sat, 26 Mar 2011 01:01:17 +0100
+Subject: [PATCH 6/8] Corrected access to freed memory location. Reported by Vitaly Kruglikov.
+
+---
+ lib/opencdk/stream.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/lib/opencdk/stream.c b/lib/opencdk/stream.c
+index 29bea09..a9e0af3 100644
+--- a/lib/opencdk/stream.c
++++ b/lib/opencdk/stream.c
+@@ -761,6 +761,7 @@ stream_fp_replace (cdk_stream_t s, FILE ** tmp)
+   rc = fclose (s->fp);
+   if (rc)
+     {
++      s->fp = NULL;
+       gnutls_assert ();
+       return CDK_File_Error;
+     }
+@@ -822,6 +823,7 @@ stream_filter_write (cdk_stream_t s)
+         {
+           _gnutls_read_log ("filter [close]: fd=%d\n", fileno (f->tmp));
+           fclose (f->tmp);
++          f->tmp = NULL;
+           break;
+         }
+     }
+@@ -960,7 +962,7 @@ cdk_stream_read (cdk_stream_t s, void *buf, size_t buflen)
+       if (rc)
+         {
+           s->error = rc;
+-          if (feof (s->fp))
++          if (s->fp && feof (s->fp))
+             s->flags.eof = 1;
+           gnutls_assert ();
+           return EOF;
+-- 
+1.7.2.5
+

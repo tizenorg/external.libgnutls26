@@ -1,0 +1,25 @@
+From 24a7f63c4abb84786dec5d2eaeaa455b7bf24cb0 Mon Sep 17 00:00:00 2001
+From: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+Date: Fri, 25 Mar 2011 20:31:11 +0100
+Subject: [PATCH 2/8] Corrected uninitialized var deinitiation. Reported by Vitaly Kruglikov.
+
+---
+ lib/opencdk/verify.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/lib/opencdk/verify.c b/lib/opencdk/verify.c
+index 957eb98..397b3ed 100644
+--- a/lib/opencdk/verify.c
++++ b/lib/opencdk/verify.c
+@@ -179,6 +179,8 @@ file_verify_clearsign (cdk_ctx_t hd, const char *file, const char *output)
+   int err;
+   cdk_error_t rc;
+ 
++  memset(&md, 0, sizeof(md));
++
+   if (output)
+     {
+       rc = cdk_stream_create (output, &out);
+-- 
+1.7.2.5
+

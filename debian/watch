@@ -1,0 +1,2 @@
+version=3
+ftp://ftp.gnutls.org/pub/gnutls/devel/gnutls-(.*)\.tar\.bz2 debian uupdate

@@ -1,0 +1,83 @@
+Source: gnutls26
+Section: libs
+Priority: optional
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>, Dongwook Lee <dwmax.lee@samsung.com>, Taeksu Shin <taeksu.shin@samsung.com>
+Uploaders: Dongwook Lee <dwmax.lee@samsung.com>, Taeksu Shin <taeksu.shin@samsung.com>
+Build-Depends: debhelper (>= 7.0.14), libgcrypt11-dev (>= 1.4.0), zlib1g-dev,
+ cdbs (>= 0.4.53), gtk-doc-tools, texinfo (>= 4.8),
+ autotools-dev
+Build-Conflicts: libgnutls-dev
+Standards-Version: 3.9.1
+Vcs-Svn: svn://svn.debian.org/svn/pkg-gnutls/packages/gnutls26/trunk
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-gnutls/packages/gnutls26/trunk/
+Homepage: http://www.gnutls.org/
+
+Package: libgnutls-dev
+Priority: optional
+Section: libdevel
+Architecture: any
+Provides: gnutls-dev
+Depends: libgnutls26 (= ${binary:Version}), 
+ libgcrypt11-dev (>= 1.4.0), libc6-dev | libc-dev, zlib1g-dev,
+ ${misc:Depends}
+Suggests: gnutls-doc, gnutls-bin, guile-gnutls
+Conflicts: libgnutls11-dev, gnutls-dev (<< 0.4.0-0), gnutls0.4-dev
+Replaces: libgnutls11-dev, gnutls-dev (<< 0.4.0-0), gnutls0.4-dev
+Description: the GNU TLS library - development files
+ GnuTLS is a portable library which implements the Transport Layer
+ Security (TLS 1.0, 1.1, 1.2) and Secure Sockets Layer (SSL) 3.0 protocols.
+ .
+ GnuTLS features support for:
+  - TLS extensions: server name indication, max record size, opaque PRF
+    input, etc.
+  - authentication using the SRP protocol.
+  - authentication using both X.509 certificates and OpenPGP keys.
+  - TLS Pre-Shared-Keys (PSK) extension.
+  - Inner Application (TLS/IA) extension.
+  - X.509 and OpenPGP certificate handling.
+  - X.509 Proxy Certificates (RFC 3820).
+  - all the strong encryption algorithms (including SHA-256/384/512 and
+    Camellia (RFC 4132)).
+ .
+ This package contains the GnuTLS development files.
+
+Package: libgnutls26
+Priority: standard
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: gnutls0, gnutls3, gnutls0.4
+Conflicts: gnutls0, gnutls0.4
+# Bug 587755. - This could be removed after a libgnutls soname bump.
+Breaks: libsoup2.4-1 (<= 2.30.1-1), libsoup2.4-1 (= 2.31.2-1)
+Suggests: gnutls-bin
+Description: the GNU TLS library - runtime library
+ GnuTLS is a portable library which implements the Transport Layer
+ Security (TLS 1.0, 1.1, 1.2) and Secure Sockets Layer (SSL) 3.0 protocols.
+ .
+ GnuTLS features support for:
+  - TLS extensions: server name indication, max record size, opaque PRF
+    input, etc.
+  - authentication using the SRP protocol.
+  - authentication using both X.509 certificates and OpenPGP keys.
+  - TLS Pre-Shared-Keys (PSK) extension.
+  - Inner Application (TLS/IA) extension.
+  - X.509 and OpenPGP certificate handling.
+  - X.509 Proxy Certificates (RFC 3820).
+  - all the strong encryption algorithms (including SHA-256/384/512 and
+    Camellia (RFC 4132)).
+ .
+ This package contains the runtime libraries.
+
+Package: libgnutls26-dbg
+Priority: extra
+Architecture: any
+Section: debug
+Depends: libgnutls26 (= ${binary:Version}), ${misc:Depends}
+Conflicts: libgnutls13-dbg
+Description: GNU TLS library - debugger symbols
+ GnuTLS is a portable library which implements the Transport Layer
+ Security (TLS 1.0, 1.1, 1.2) and Secure Sockets Layer (SSL) 3.0 protocols.
+ .
+ This package contains the debugger symbols.
+

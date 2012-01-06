@@ -1,0 +1,4 @@
+debian/tmp/usr/lib/libgnutls.so.* usr/lib
+#Don't install extra library.
+#debian/tmp/usr/lib/libgnutls-e*.so.* usr/lib
+debian/tmp/usr/share/locale/* /usr/share/locale
