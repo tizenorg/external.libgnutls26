@@ -10,6 +10,7 @@ BuildRequires: zlib-devel, readline-devel, libtasn1-devel
 BuildRequires: lzo-devel, libtool, automake, autoconf
 URL: http://www.gnutls.org/
 Source0: %{name}-%{version}.tar.gz
+Source1001: packaging/gnutls.manifest 
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: libgcrypt >= 1.2.2
@@ -39,6 +40,7 @@ the GnuTLS library.
 %setup -q
 
 %build
+cp %{SOURCE1001} .
 
 rm -f doc/*.info* lib/po/libgnutls26.pot
 if [ -e doc/gnutls.pdf.debbackup ] && [ ! -e doc/gnutls.pdf ] ; then
@@ -67,10 +69,12 @@ rm -fr $RPM_BUILD_ROOT
 
 
 %files
+%manifest gnutls.manifest
 %{_libdir}/libgnutls*.so.*
 %{_prefix}/share/locale/*/LC_MESSAGES/libgnutls26.mo
 
 %files devel
+%manifest gnutls.manifest
 %{_includedir}/*
 %{_libdir}/libgnutls*.so
 %{_libdir}/pkgconfig/*.pc
