@@ -22,8 +22,8 @@ dnl Process this file with autoconf to produce a configure script.
 # USA
 
 AC_PREREQ(2.61)
-AC_INIT([GnuTLS], [2.12.0], [bug-gnutls@gnu.org])
-#AC_CONFIG_AUX_DIR([build-aux])
+AC_INIT([GnuTLS], [2.12.20], [bug-gnutls@gnu.org])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.10 no-dist-gzip dist-bzip2 -Wall -Werror -Wno-override])
@@ -62,9 +62,10 @@ if test "$use_cxx" != "no"; then
   AC_LANG_POP(C++)
 fi
 AM_CONDITIONAL(ENABLE_CXX, test "$use_cxx" != "no")
+AM_CONDITIONAL(WANT_TEST_SUITE, [test -f tests/suite/mini-eagain2.c])
 
 LIBGNUTLS_HOOKS
-#LIBGNUTLS_EXTRA_HOOKS
+LIBGNUTLS_EXTRA_HOOKS
 
 AC_HEADER_STDC
 AC_DEFINE([HAVE_STRINGS_H], 1, [Hard-code for src/cfg/.])
@@ -78,13 +79,25 @@ AC_DEFINE([HAVE_ERRNO_H], 1, [Hard-code for src/cfg/.])
 AC_CHECK_FUNCS(fork,,)
 AM_CONDITIONAL(HAVE_FORK, test "$ac_cv_func_fork" != "no")
 
+dnl Check for p11-kit
+AC_ARG_WITH(p11-kit,
+	AS_HELP_STRING([--without-p11-kit],
+		[Build without p11-kit and PKCS#11 support]))
+AM_CONDITIONAL(ENABLE_PKCS11, test "$with_p11_kit" != "no")
+if test "$with_p11_kit" != "no"; then
+	PKG_CHECK_MODULES(P11_KIT, [p11-kit-1 >= 0.11])
+	AC_DEFINE(ENABLE_PKCS11, 1, [Build PKCS#11 support])
+	CFLAGS="$CFLAGS $P11_KIT_CFLAGS"
+	LIBS="$LIBS $P11_KIT_LIBS"
+	with_p11_kit=yes
+fi
+
 AC_CHECK_TYPES(uint,,, [
 # include <sys/types.h>
 ])
 
 # For Guile bindings.
-#opt_guile_bindings=yes
-opt_guile_bindings=no
+opt_guile_bindings=yes
 AC_MSG_CHECKING([whether building Guile bindings])
 AC_ARG_ENABLE(guile,
 	AS_HELP_STRING([--enable-guile], [build GNU Guile bindings]),
@@ -187,64 +200,64 @@ LIBS=$SAVED_LIBS
 AC_MSG_CHECKING([whether to use the included libcfg])
 AC_MSG_RESULT($libcfg_enabled)
 
-#AC_LIBTOOL_WIN32_DLL
+AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-#gl_INIT
+gl_INIT
 
-#AC_ARG_ENABLE([gcc-warnings],
-#  [AS_HELP_STRING([--enable-gcc-warnings],
-#		  [turn on lots of GCC warnings (for developers)])],
-#  [case $enableval in
-#     yes|no) ;;
-#     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
-#   esac
-#   gl_gcc_warnings=$enableval],
-#  [gl_gcc_warnings=no]
-#)
+AC_ARG_ENABLE([gcc-warnings],
+  [AS_HELP_STRING([--enable-gcc-warnings],
+		  [turn on lots of GCC warnings (for developers)])],
+  [case $enableval in
+     yes|no) ;;
+     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
+   esac
+   gl_gcc_warnings=$enableval],
+  [gl_gcc_warnings=no]
+)
 
-#if test "$gl_gcc_warnings" = yes; then
-#  gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
-#  gl_WARN_ADD([-Wframe-larger-than=5120], [WSTACK_CFLAGS])
-#
-#  nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
-#  nw="$nw -Wc++-compat"             # We don't care about C++ compilers
-#  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
-#  nw="$nw -Wtraditional"            # Warns on #elif which we use often
-#  nw="$nw -Wlogical-op"             # Too many false positives
-#  nw="$nw -Wold-style-definition"   # 
-#  nw="$nw -Wpadded"                 # Our structs are not padded
-#  nw="$nw -Wunreachable-code"       # Too many false positives
-#  nw="$nw -Wtraditional-conversion" # Too many warnings for now
-#  nw="$nw -Wcast-qual"              # Too many warnings for now
-#  nw="$nw -Waggregate-return"       # Too many warnings for now
-#  nw="$nw -Wshadow"                 # Too many warnings for now
-#  nw="$nw -Wswitch-default"         # Too many warnings for now
-#  nw="$nw -Wswitch-enum"            # Too many warnings for now
-#  nw="$nw -Wconversion"             # Too many warnings for now
-#  nw="$nw -Wsign-conversion"        # Too many warnings for now
-#  nw="$nw -Wformat-y2k"             # Too many warnings for now
-#  nw="$nw -Wvla"                    # There is no point to avoid C99 variable length arrays
-#  nw="$nw -Wformat-nonliteral"      # Incompatible with gettext _()
-#  nw="$nw -Wunsafe-loop-optimizations"
-#  nw="$nw -Wstrict-overflow"
-#  nw="$nw -Wmissing-noreturn"
-#
-#  gl_MANYWARN_ALL_GCC([ws])
-#  gl_MANYWARN_COMPLEMENT(ws, [$ws], [$nw])
-#  for w in $ws; do
-#    gl_WARN_ADD([$w])
-#  done
-#
-#  gl_WARN_ADD([-Wno-missing-field-initializers]) # We need this one
-#  gl_WARN_ADD([-Wno-sign-compare])     # Too many warnings for now
-#  gl_WARN_ADD([-Wno-pointer-sign])     # Too many warnings for now
-#  gl_WARN_ADD([-Wno-unused-parameter]) # Too many warnings for now
-#  gl_WARN_ADD([-Wno-unused-parameter]) # Too many warnings for now
-#  gl_WARN_ADD([-Wno-stack-protector])  # Some functions cannot be protected
-#  gl_WARN_ADD([-Wno-int-to-pointer-cast])  # Some files cannot be compiled with that (gl_fd_to_handle)
-#  gl_WARN_ADD([-fdiagnostics-show-option])
-#fi
+if test "$gl_gcc_warnings" = yes; then
+  gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
+  gl_WARN_ADD([-Wframe-larger-than=5120], [WSTACK_CFLAGS])
+
+  nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
+  nw="$nw -Wc++-compat"             # We don't care about C++ compilers
+  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
+  nw="$nw -Wtraditional"            # Warns on #elif which we use often
+  nw="$nw -Wlogical-op"             # Too many false positives
+  nw="$nw -Wold-style-definition"   # 
+  nw="$nw -Wpadded"                 # Our structs are not padded
+  nw="$nw -Wunreachable-code"       # Too many false positives
+  nw="$nw -Wtraditional-conversion" # Too many warnings for now
+  nw="$nw -Wcast-qual"              # Too many warnings for now
+  nw="$nw -Waggregate-return"       # Too many warnings for now
+  nw="$nw -Wshadow"                 # Too many warnings for now
+  nw="$nw -Wswitch-default"         # Too many warnings for now
+  nw="$nw -Wswitch-enum"            # Too many warnings for now
+  nw="$nw -Wconversion"             # Too many warnings for now
+  nw="$nw -Wsign-conversion"        # Too many warnings for now
+  nw="$nw -Wformat-y2k"             # Too many warnings for now
+  nw="$nw -Wvla"                    # There is no point to avoid C99 variable length arrays
+  nw="$nw -Wformat-nonliteral"      # Incompatible with gettext _()
+  nw="$nw -Wunsafe-loop-optimizations"
+  nw="$nw -Wstrict-overflow"
+  nw="$nw -Wmissing-noreturn"
+
+  gl_MANYWARN_ALL_GCC([ws])
+  gl_MANYWARN_COMPLEMENT(ws, [$ws], [$nw])
+  for w in $ws; do
+    gl_WARN_ADD([$w])
+  done
+
+  gl_WARN_ADD([-Wno-missing-field-initializers]) # We need this one
+  gl_WARN_ADD([-Wno-sign-compare])     # Too many warnings for now
+  gl_WARN_ADD([-Wno-pointer-sign])     # Too many warnings for now
+  gl_WARN_ADD([-Wno-unused-parameter]) # Too many warnings for now
+  gl_WARN_ADD([-Wno-unused-parameter]) # Too many warnings for now
+  gl_WARN_ADD([-Wno-stack-protector])  # Some functions cannot be protected
+  gl_WARN_ADD([-Wno-int-to-pointer-cast])  # Some files cannot be compiled with that (gl_fd_to_handle)
+  gl_WARN_ADD([-fdiagnostics-show-option])
+fi
 
 # Export things for */configure.ac.
 export WERROR_CFLAGS
@@ -255,46 +268,46 @@ export use_cxx
 AC_DEFINE([GNUTLS_COMPAT_H], 1, [Make sure we don't use old features in code.])
 
 AC_CONFIG_SUBDIRS([lib])
-#AC_CONFIG_SUBDIRS([libextra])
+AC_CONFIG_SUBDIRS([libextra])
 
-#AC_CONFIG_FILES([guile/pre-inst-guile], [chmod +x guile/pre-inst-guile])
+AC_CONFIG_FILES([guile/pre-inst-guile], [chmod +x guile/pre-inst-guile])
 AC_CONFIG_FILES([
   Makefile
+  doc/Makefile
+  doc/credentials/Makefile
+  doc/credentials/openpgp/Makefile
+  doc/credentials/srp/Makefile
+  doc/credentials/x509/Makefile
+  doc/cyclo/Makefile
+  doc/doxygen/Doxyfile
+  doc/examples/Makefile
+  doc/manpages/Makefile
+  doc/reference/Makefile
+  doc/scripts/Makefile
+  gl/Makefile
+  gl/tests/Makefile
+  guile/Makefile
+  guile/modules/Makefile
+  guile/src/Makefile
+  guile/tests/Makefile
+  src/Makefile
+  src/cfg/Makefile
+  src/cfg/platon/Makefile
+  src/cfg/platon/str/Makefile
+  tests/Makefile
+  tests/key-id/Makefile
+  tests/dsa/Makefile
+  tests/openpgp-certs/Makefile
+  tests/safe-renegotiation/Makefile
+  tests/pathlen/Makefile
+  tests/pkcs1-padding/Makefile
+  tests/pkcs12-decode/Makefile
+  tests/pkcs8-decode/Makefile
+  tests/rsa-md5-collision/Makefile
+  tests/sha2/Makefile
+  tests/userid/Makefile
+  tests/suite/Makefile
 ])
-
-#  doc/Makefile
-#  doc/credentials/Makefile
-#  doc/credentials/openpgp/Makefile
-#  doc/credentials/srp/Makefile
-#  doc/credentials/x509/Makefile
-#  doc/cyclo/Makefile
-#  doc/doxygen/Doxyfile
-#  doc/examples/Makefile
-#  doc/manpages/Makefile
-#  doc/reference/Makefile
-#  doc/scripts/Makefile
-#  gl/Makefile
-#  gl/tests/Makefile
-#  guile/Makefile
-#  guile/modules/Makefile
-#  guile/src/Makefile
-#  guile/tests/Makefile
-#  src/Makefile
-#  src/cfg/Makefile
-#  src/cfg/platon/Makefile
-#  src/cfg/platon/str/Makefile
-#  tests/Makefile
-#  tests/key-id/Makefile
-#  tests/dsa/Makefile
-#  tests/openpgp-certs/Makefile
-#  tests/safe-renegotiation/Makefile
-#  tests/pathlen/Makefile
-#  tests/pkcs1-padding/Makefile
-#  tests/pkcs12-decode/Makefile
-#  tests/pkcs8-decode/Makefile
-#  tests/rsa-md5-collision/Makefile
-#  tests/sha2/Makefile
-#  tests/userid/Makefile
 
 AC_OUTPUT
 
@@ -312,4 +325,5 @@ AC_MSG_NOTICE([summary of build options:
   OpenSSL library:  $enable_openssl
   /dev/crypto:      $enable_cryptodev
   Crypto library:   $cryptolib
+  PKCS#11 support:  $with_p11_kit
 ])

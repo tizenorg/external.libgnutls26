@@ -3,7 +3,332 @@ Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005,
               2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 See the end for copying conditions.
 
-* Version 2.xx.y (unreleased)
+Version 2.12.20 (released 2012-06-10)
+
+** libgnutls: Fixed memory leak in PKCS #8 key import.
+
+** libgnutls: Check key identifiers when checking for an issuer.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+Version 2.12.19 (released 2012-05-05)
+
+** libgnutls: When decoding a PKCS #11 URL the pin-source field
+is assumed to be a file that stores the pin. Based on patch
+by David Smith.
+
+** libgnutls: Added strict tests in Diffie-Hellman and
+SRP key exchange public keys.
+
+** minitasn1: Upgraded to libtasn1 version 2.13 (pre-release).
+
+** API and ABI modifications:
+No changes since last version.
+
+
+Version 2.12.18 (released 2012-03-16)
+
+** minitasn1: Upgraded to libtasn1 version 2.12 (pre-release).
+
+** Corrected SRP-RSA ciphersuites when used under TLS 1.2.
+
+** Fixed leaks in key generation. Reported by Sam Varshavchik,
+patch by Tomas Mraz.
+
+** API and ABI modifications:
+
+No changes since last version.
+
+
+Version 2.12.17 (released 2012-03-02)
+
+** libgnutls: Corrections in record packet parsing.
+Reported by Matthew Hall.
+
+** libgnutls: Fixes in SRP authentication.
+
+** libgnutls: Added function to force explicit reinitialization
+of PKCS #11 modules. This is required on the child process after
+a fork.
+
+** libgnutls: PKCS #11 objects that do not have ID
+no longer crash listing. Reported by Sven Geggus.
+
+** API and ABI modifications:
+gnutls_pkcs11_reinit: Added
+
+
+Version 2.12.16 (released 2011-01-06)
+
+** libgnutls: Corrected functionality of
+gnutls_record_get_direction(). Reported by Philip Allison.
+
+** API and ABI modifications:
+
+No changes since last version.
+
+
+Version 2.12.15 (released 2011-01-06)
+
+** libgnutls: Disable signature algorithms that are not supported
+for client certificate verification. Reported by Florian Weimer.
+
+** libgnutls: Optimized DH generation process (ported from 3.0.x)
+
+** API and ABI modifications:
+
+No changes since last version.
+
+
+Version 2.12.14 (released 2011-11-08)
+
+** libgnutls: Corrected fix in gnutls_session_get_data()
+to report the actual session size when the provided buffer
+is not enough.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+Version 2.12.13 (released 2011-11-07)
+
+** minitasn1: Upgraded to libtasn1 version 2.10.
+
+** libgnutls: Fixed possible buffer overflow in 
+gnutls_session_get_data(). Reported and fix by Alban Crequy.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+Version 2.12.12 (released 2011-10-20)
+
+** gnulib: updated
+
+** libgnutls: Fixes to enable external signing callback to
+operate with TLS 1.2. 
+
+** API and ABI modifications:
+No changes since last version.
+
+
+Version 2.12.11 (released 2011-09-18)
+
+** libgnutls: Memory leak fixes in credentials private key 
+deinitialization. Reported by Dan Winship.
+
+** libgnutls: Allow CA importing of 0 certificates to succeed.
+Reported by Jonathan Nieder <jrnieder@gmail.com> in
+<http://bugs.debian.org/640639>.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+* Version 2.12.10 (released 2011-09-01)
+
+** libgnutls: OpenPGP certificate type is not enabled
+by default.
+
+** libgnutls: Corrected issue in gnutls_record_recv()
+triggered on encryption or compression error.
+
+** libgnutls: Corrected parsing of XMPP subject alternative 
+names.
+
+** libgnutls: gnutls_certificate_set_x509_key() and
+gnutls_certificate_set_openpgp_key() operate as in 2.10.x
+and allow the release of the private key during the
+lifetime of the certificate structure.
+
+** API and ABI modifications:
+GNUTLS_PRIVKEY_IMPORT_COPY: new gnutls_privkey_import() flag
+
+
+* Version 2.12.9 (released 2011-08-21)
+
+** libgnutls-extra: Replaced enumeration with unsigned
+int, in openssl.h to make it identical to the 3.0.0 version.
+This shouldn't introduce binary incompatibility.
+
+** libgnutls: When asking for a PIN multiple times, the
+flags in the callback were not being updated to reflect
+for PIN low count or final try.
+
+** API and ABI modifications:
+GNUTLS_PKCS11_PIN_WRONG: New flag for PIN callback
+
+
+* Version 2.12.8 (released 2011-08-08)
+
+** libgnutls: PKCS #11 back-end was replaced by p11-kit
+http://p11-glue.freedesktop.org/p11-kit.html. This backports
+the 3.0.0 PKCS #11 back-end. Rewrite by Stef Walter.
+
+** libgnutls: gcrypt: replaced occurences of gcry_sexp_nth_mpi (..., 0)
+with gcry_sexp_nth_mpi (..., GCRYMPI_FMT_USG) to fix errors with 1.5.0.
+Patch by Andreas Metzler.
+
+** libgnutls: Verify that a certificate list specified
+using gnutls_certificate_set_x509_key*(), is sorted
+according to TLS specification (from subject to issuer).
+
+** libgnutls: Added GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED flag for
+gnutls_x509_crt_list_import. It checks whether the list to be 
+imported is properly sorted.
+
+** libgnutls: writev_emu: stop on the first incomplete write. Patch by
+Sjoerd Simons.
+
+** libgnutls: Fix zlib handling in gnutls.pc. Patch by Andreas
+Metzler.
+
+** certtool: bug fixes in certificate request generation. Patch
+by Petr Písař.
+
+** API and ABI modifications:
+GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED: New element in gnutls_certificate_import_flags
+
+
+* Version 2.12.7 (released 2011-06-18)
+
+** p11tool: Require login as security officer if --trusted option is
+provided. Reported by Rickard Bellgrim.
+
+** libgnutls: The CKA_SUBJECT field is specified when copying certificates
+in PKCS #11 smart-cards. Patch by Rickard Bellgrim.
+
+** libgnutls: Write label when writing private keys in PKCS #11 tokens.
+Reported by Rickard Bellgrim.
+
+** libgnutls: Accept CKR_USER_ALREADY_LOGGED_IN as a valid error code
+when logging in to PKCS #11 tokens.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+* Version 2.12.6 (released 2011-06-4)
+
+** libgnutls: Allow usage of DSA signatures with truncated hash.
+Following: http://tools.ietf.org/html/draft-mavrogiannopoulos-tls-dss-00
+
+** libgnutls: Prevent the usage of write() and friends when no data
+are to be sent.
+
+** libgnutls: Correctly set compression method when resuming sessions.
+Reported by Dash Shendy.
+
+** libgnutls: gnutls_pubkey_get_pk_dsa_raw() and gnutls_pubkey_get_pk_rsa_raw
+add leading zeros to the exported values.
+
+** libgnutls: Added gnutls_global_set_time_function() to allow overriding the
+default system time() function.
+
+** API and ABI modifications:
+gnutls_global_set_time_function: ADDED
+
+
+* Version 2.12.5 (released 2011-05-14)
+
+** certtool: Can now load private keys and public keys from PKCS #11 tokens
+via URLs.
+
+** libgnutls: PKCS #11 URLs conform to the latest draft
+being http://tools.ietf.org/html/draft-pechanec-pkcs11uri-04.
+
+** libgnutls: gnutls_pkcs11_privkey_import_url() will now correctly read
+the public key algorithm of the key.
+
+** libgnutls: Added gnutls_x509_crq_verify() to allow
+verification of the self signature in a certificate request.
+This allows verifying whether the owner of the private key
+is the generator of the request.
+
+** libgnutls: gnutls_x509_crt_set_crq() implicitly verifies
+the self signature of the request.
+
+** API and ABI modifications:
+gnutls_x509_crq_verify: ADDED
+
+
+* Version 2.12.4 (released 2011-05-06)
+
+** libgnutls: Added gnutls_certificate_get_issuer() to
+compensate for the deprecated gnutls_certificate_get_x509_cas().
+
+** libgnutls: Limited allowed wildcards to gnutls_x509_crt_check_hostname()
+to prevent denial of service attacks. Reported by Kalle Olavi Niemitalo.
+
+** guile: Fix tests to match the `exit' behavior introduced in Guile 2.0.1.
+This fix makes tests behave correctly wrt. to the Guile bug fix at
+<http://git.sv.gnu.org/cgit/guile.git/commit/?id=e309f3bf9ee910c4772353ca3ff95f6f4ef466b5>.
+
+** API and ABI modifications:
+gnutls_certificate_get_issuer: ADDED
+
+
+* Version 2.12.3 (released 2011-04-22)
+
+* libgnutls: Several minor bugfixes.
+
+* libgnutls: Restored HMAC-MD5 for compatibility. Although considered 
+weak, several sites require it for connection. It is enabled for
+"NORMAL" and "PERFORMANCE" priority strings.
+
+* libgnutls: depend on libdl.
+
+* libgnutls: gnutls_transport_set_global_errno() was deprecated.
+Use your system's errno fascility or gnutls_transport_set_errno().
+
+* gnutls-cli: Correction with usage of select to check for
+pending data in gnutls sessions. It now uses gnutls_record_check_pending().
+Reported by Herbert J. Skuhra.
+
+* tests: More fixes and updates for win32. Patches by LRN.
+
+* libgnutls: Several files unnecessarily included <gcrypt.h>; this has been fixed.
+
+** API and ABI modifications:
+gnutls_transport_set_global_errno: DEPRECATED
+
+
+* Version 2.12.2 (released 2011-04-08)
+
+** libgnutls: Several updates and fixes for win32. Patches by LRN.
+
+** libgnutls: Several bug and memory leak fixes.
+
+** srptool: Accepts the -d option to enable debugging.
+
+** libgnutls: Corrected bug in gnutls_srp_verifier() that prevented
+the allocation of a verifier. Reported by Andrew Wiseman.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+* Version 2.12.1 (released 2011-04-02)
+
+** certtool: Generated certificate request with stricter permissions.
+Reported by Luca Capello.
+
+** libgnutls: Bug fixes in opencdk code. Reported by Vitaly Kruglikov.
+
+** libgnutls: Corrected windows system_errno() function prototype.
+
+** libgnutls: C++ compatibility fix for compat.h. Reported by Mark Brand.
+
+** libgnutls: Fix size of gnutls_openpgp_keyid_t by using the
+GNUTLS_OPENPGP_KEYID_SIZE definition. Reported by Andreas Metzler.
+
+** API and ABI modifications:
+No changes since last version.
+
+
+* Version 2.12.0 (released 2011-03-24)
 
 ** certtool: Warns on generation of DSA keys of over 1024 bits, about
 the incompatibility with TLS other than 1.2.
@@ -31,7 +356,6 @@ This introduces an ABI incompatibility with previous versions.
 ** API and ABI modifications:
 gnutls_pubkey_import_openpgp: MODIFIED
 
-No changes since last version.
 
 * Version 2.11.7 (released 2011-03-09)
 

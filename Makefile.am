@@ -20,19 +20,14 @@
 # along with this file; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-# Changes
-# Make library only
-#DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
-#SUBDIRS = lib libextra gl src doc tests
-#if HAVE_GUILE
-#SUBDIRS += guile
-#endif
-#
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
+SUBDIRS = lib libextra gl src doc tests
 
-SUBDIRS = lib
+if HAVE_GUILE
+SUBDIRS += guile
+endif
 
-#ACLOCAL_AMFLAGS = -I m4 -I gl/m4 -I lib/gl/m4 -I libextra/gl/m4 -I lib/m4 -I libextra/m4
-ACLOCAL_AMFLAGS = -I m4 -I lib/m4
+ACLOCAL_AMFLAGS = -I m4 -I gl/m4 -I lib/gl/m4 -I libextra/gl/m4 -I lib/m4 -I libextra/m4
 
 EXTRA_DIST = cfg.mk maint.mk .clcopying

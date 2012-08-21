@@ -1,6 +1,0 @@
-14_version_gettextcat.diff
-16_unnecessarydep.diff
-17_sizeof_gnutls_openpgp_keyid_t.diff
-18_ext_mod_iadef.diff
-19_uninitializedvar.diff
-20_access_freedmemory.diff

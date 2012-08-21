@@ -70,7 +70,7 @@ int _gnutls_buffer_pop_datum_prefix (gnutls_buffer_st * buf,
                                      gnutls_datum_t * data);
 int _gnutls_buffer_to_datum (gnutls_buffer_st * str, gnutls_datum_t * data);
 
-int _gnutls_buffer_escape (gnutls_buffer_st * dest,
+int _gnutls_buffer_escape (gnutls_buffer_st * dest, int all, 
                            const char *const invalid_chars);
 int _gnutls_buffer_unescape (gnutls_buffer_st * dest);
 
@@ -91,8 +91,9 @@ int _gnutls_hex2bin (const opaque * hex_data, int hex_size, opaque * bin_data,
                      size_t * bin_size);
 
 int _gnutls_hostname_compare (const char *certname, size_t certnamesize,
-                              const char *hostname);
+                              const char *hostname, int level);
 #define MAX_CN 256
+#define MAX_DN 1024
 
 #define BUFFER_APPEND(b, x, s) { \
         ret = _gnutls_buffer_append_data(b, x, s); \

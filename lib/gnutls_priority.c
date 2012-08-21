@@ -355,9 +355,10 @@ static const int sign_priority_secure256[] = {
   0
 };
 
-static const int mac_priority_performance[] = {
+static const int mac_priority_normal[] = {
   GNUTLS_MAC_SHA1,
   GNUTLS_MAC_SHA256,
+  GNUTLS_MAC_MD5,
   0
 };
 
@@ -368,7 +369,12 @@ static const int mac_priority_secure[] = {
   0
 };
 
-static int cert_type_priority[] = {
+static const int cert_type_priority_default[] = {
+  GNUTLS_CRT_X509,
+  0
+};
+
+static const int cert_type_priority_all[] = {
   GNUTLS_CRT_X509,
   GNUTLS_CRT_OPENPGP,
   0
@@ -557,7 +563,7 @@ gnutls_priority_init (gnutls_priority_t * priority_cache,
     {
       _set_priority (&(*priority_cache)->protocol, protocol_priority);
       _set_priority (&(*priority_cache)->compression, comp_priority);
-      _set_priority (&(*priority_cache)->cert_type, cert_type_priority);
+      _set_priority (&(*priority_cache)->cert_type, cert_type_priority_default);
       _set_priority (&(*priority_cache)->sign_algo, sign_priority_default);
       i = 0;
     }
@@ -573,7 +579,7 @@ gnutls_priority_init (gnutls_priority_t * priority_cache,
           _set_priority (&(*priority_cache)->cipher,
                          cipher_priority_performance);
           _set_priority (&(*priority_cache)->kx, kx_priority_performance);
-          _set_priority (&(*priority_cache)->mac, mac_priority_performance);
+          _set_priority (&(*priority_cache)->mac, mac_priority_normal);
           _set_priority (&(*priority_cache)->sign_algo,
                          sign_priority_default);
         }
@@ -581,7 +587,7 @@ gnutls_priority_init (gnutls_priority_t * priority_cache,
         {
           _set_priority (&(*priority_cache)->cipher, cipher_priority_normal);
           _set_priority (&(*priority_cache)->kx, kx_priority_secure);
-          _set_priority (&(*priority_cache)->mac, mac_priority_secure);
+          _set_priority (&(*priority_cache)->mac, mac_priority_normal);
           _set_priority (&(*priority_cache)->sign_algo,
                          sign_priority_default);
         }
@@ -675,7 +681,7 @@ gnutls_priority_init (gnutls_priority_t * priority_cache,
               if (strncasecmp (&broken_list[i][1], "CTYPE-ALL", 9) == 0)
                 {
                   bulk_fn (&(*priority_cache)->cert_type,
-                                 cert_type_priority);
+                                 cert_type_priority_all);
                 }
               else
                 {

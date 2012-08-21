@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2010 Free
- * Software Foundation, Inc.
+ * Copyright (C) 2010,2011 Free Software Foundation, Inc.
  *
  * Author: Nikos Mavrogiannopoulos
  *
@@ -390,7 +389,7 @@ wrap_nettle_mpi_mul_ui (bigint_t w, const bigint_t a, unsigned long b)
 
 }
 
-#define PRIME_CHECK_PARAM 18
+#define PRIME_CHECK_PARAM 8
 static int
 wrap_nettle_prime_check (bigint_t pp)
 {
@@ -408,7 +407,7 @@ wrap_nettle_prime_check (bigint_t pp)
 
 /* generate a prime of the form p=2qw+1
  * The algorithm is simple but probably it has to be modified to gcrypt's
- * since it is really really slow. Nature did not want 2qw+1 to be prime.
+ * since it is slow. Nature did not want 2qw+1 to be prime.
  * The generator will be the generator of a subgroup of order q-1.
  *
  * Algorithm based on the algorithm in "A Computational Introduction to Number 
@@ -422,9 +421,6 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
   opaque *buffer = NULL;
   unsigned int q_bytes, w_bytes, r_bytes, w_bits;
   int ret;
-
-  mpz_init (*prime);
-  mpz_init (*generator);
 
   /* security level enforcement. 
    * Values for q are selected according to ECRYPT II recommendations.
@@ -441,6 +437,11 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
   if (nbits % 8 != 0)
     p_bytes++;
 
+  w_bits = nbits - q_bytes * 8;
+  w_bytes = w_bits / 8;
+  if (w_bits % 8 != 0)
+    w_bytes++;
+
   _gnutls_debug_log
     ("Generating group of prime of %u bits and format of 2wq+1. q_size=%u bits\n",
      nbits, q_bytes * 8);
@@ -451,8 +452,6 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
       return GNUTLS_E_MEMORY_ERROR;
     }
 
-  mpz_init2 (*prime, nbits);
-  mpz_init (*generator);
   mpz_init (q);
   mpz_init (w);
 
@@ -461,18 +460,18 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
    */
   for (;;)
     {
-      ret = _gnutls_rnd (GNUTLS_RND_RANDOM, buffer, q_bytes);
+      ret = _gnutls_rnd (GNUTLS_RND_RANDOM, buffer, w_bytes);
       if (ret < 0)
         {
           gnutls_assert ();
           goto fail;
         }
 
-      nettle_mpz_set_str_256_u (q, q_bytes, buffer);
+      nettle_mpz_set_str_256_u (w, w_bytes, buffer);
       /* always odd */
-      mpz_setbit (q, 0);
+      mpz_setbit (w, 0);
 
-      ret = mpz_probab_prime_p (q, PRIME_CHECK_PARAM);
+      ret = mpz_probab_prime_p (w, PRIME_CHECK_PARAM);
       if (ret > 0)
         {
           break;
@@ -481,30 +480,24 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
 
   /* now generate w of size p_bytes - q_bytes */
 
-  w_bits = nbits - wrap_nettle_mpi_get_nbits (&q);
-
   _gnutls_debug_log
-    ("Found prime q of %u bits. Will look for w of %u bits...\n",
-     wrap_nettle_mpi_get_nbits (&q), w_bits);
-
-  w_bytes = w_bits / 8;
-  if (w_bits % 8 != 0)
-    w_bytes++;
+    ("Found prime w of %u bits. Will look for q of %u bits...\n",
+     wrap_nettle_mpi_get_nbits (&w), q_bytes*8);
 
   for (;;)
     {
-      ret = _gnutls_rnd (GNUTLS_RND_RANDOM, buffer, w_bytes);
+      ret = _gnutls_rnd (GNUTLS_RND_RANDOM, buffer, q_bytes);
       if (ret < 0)
         {
           gnutls_assert ();
           return ret;
         }
 
-      nettle_mpz_set_str_256_u (w, w_bytes, buffer);
+      nettle_mpz_set_str_256_u (q, q_bytes, buffer);
       /* always odd */
-      mpz_setbit (w, 0);
+      mpz_setbit (q, 0);
 
-      ret = mpz_probab_prime_p (w, PRIME_CHECK_PARAM);
+      ret = mpz_probab_prime_p (q, PRIME_CHECK_PARAM);
       if (ret == 0)
         {
           continue;
@@ -522,8 +515,8 @@ gen_group (mpz_t * prime, mpz_t * generator, unsigned int nbits)
         }
     }
 
-  _gnutls_debug_log ("Found prime w of %u bits. Looking for generator...\n",
-                     wrap_nettle_mpi_get_nbits (&w));
+  _gnutls_debug_log ("Found prime q of %u bits. Looking for generator...\n",
+                     wrap_nettle_mpi_get_nbits (&q));
 
   /* finally a prime! Let calculate generator
    */

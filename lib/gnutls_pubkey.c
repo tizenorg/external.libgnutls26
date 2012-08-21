@@ -21,10 +21,8 @@
 */
 
 #include <gnutls_int.h>
-#include <pakchois/pakchois.h>
 #include <gnutls/pkcs11.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include <gnutls_errors.h>
 #include <gnutls_datum.h>
@@ -33,7 +31,6 @@
 #include <gnutls_pk.h>
 #include <x509_int.h>
 #include <openpgp/openpgp_int.h>
-#include <pkcs11_int.h>
 #include <gnutls_num.h>
 #include <x509/common.h>
 #include <x509_b64.h>
@@ -147,6 +144,13 @@ gnutls_pubkey_init (gnutls_pubkey_t * key)
 void
 gnutls_pubkey_deinit (gnutls_pubkey_t key)
 {
+int i;
+
+  for (i = 0; i < key->params_size; i++)
+    {
+      _gnutls_mpi_release (&key->params[i]);
+    }
+
   gnutls_free (key);
 }
 
@@ -266,6 +270,7 @@ gnutls_pubkey_get_preferred_hash_algorithm (gnutls_pubkey_t key,
   return ret;
 }
 
+#ifdef ENABLE_PKCS11
 
 /**
  * gnutls_pubkey_import_pkcs11: Imports a public key from a pkcs11 key
@@ -319,6 +324,8 @@ gnutls_pubkey_import_pkcs11 (gnutls_pubkey_t key,
   return 0;
 }
 
+#endif /* ENABLE_PKCS11 */
+
 #ifdef ENABLE_OPENPGP
 /**
  * gnutls_pubkey_import_openpgp: Imports a public key from an openpgp key
@@ -341,12 +348,11 @@ gnutls_pubkey_import_openpgp (gnutls_pubkey_t key,
   int ret, idx;
   uint32_t kid32[2];
   uint32_t *k;
-  gnutls_openpgp_keyid_t keyid;
+  uint8_t keyid[GNUTLS_OPENPGP_KEYID_SIZE];
 
   ret = gnutls_openpgp_crt_get_preferred_key_id (crt, keyid);
   if (ret == GNUTLS_E_OPENPGP_PREFERRED_KEY_ERROR)
     {
-      key->pk_algorithm = gnutls_openpgp_crt_get_pk_algorithm(crt, NULL);
       key->pk_algorithm = gnutls_openpgp_crt_get_pk_algorithm (crt, &key->bits);
 
       ret = gnutls_openpgp_crt_get_key_usage (crt, &key->key_usage);
@@ -552,14 +558,14 @@ gnutls_pubkey_get_pk_rsa_raw (gnutls_pubkey_t key,
       return GNUTLS_E_INVALID_REQUEST;
     }
 
-  ret = _gnutls_mpi_dprint (key->params[0], m);
+  ret = _gnutls_mpi_dprint_lz (key->params[0], m);
   if (ret < 0)
     {
       gnutls_assert ();
       return ret;
     }
 
-  ret = _gnutls_mpi_dprint (key->params[1], e);
+  ret = _gnutls_mpi_dprint_lz (key->params[1], e);
   if (ret < 0)
     {
       gnutls_assert ();
@@ -604,7 +610,7 @@ gnutls_pubkey_get_pk_dsa_raw (gnutls_pubkey_t key,
     }
 
   /* P */
-  ret = _gnutls_mpi_dprint (key->params[0], p);
+  ret = _gnutls_mpi_dprint_lz (key->params[0], p);
   if (ret < 0)
     {
       gnutls_assert ();
@@ -612,7 +618,7 @@ gnutls_pubkey_get_pk_dsa_raw (gnutls_pubkey_t key,
     }
 
   /* Q */
-  ret = _gnutls_mpi_dprint (key->params[1], q);
+  ret = _gnutls_mpi_dprint_lz (key->params[1], q);
   if (ret < 0)
     {
       gnutls_assert ();
@@ -622,7 +628,7 @@ gnutls_pubkey_get_pk_dsa_raw (gnutls_pubkey_t key,
 
 
   /* G */
-  ret = _gnutls_mpi_dprint (key->params[2], g);
+  ret = _gnutls_mpi_dprint_lz (key->params[2], g);
   if (ret < 0)
     {
       gnutls_assert ();
@@ -633,7 +639,7 @@ gnutls_pubkey_get_pk_dsa_raw (gnutls_pubkey_t key,
 
 
   /* Y */
-  ret = _gnutls_mpi_dprint (key->params[3], y);
+  ret = _gnutls_mpi_dprint_lz (key->params[3], y);
   if (ret < 0)
     {
       gnutls_assert ();
@@ -841,6 +847,8 @@ gnutls_pubkey_set_key_usage (gnutls_pubkey_t key, unsigned int usage)
   return 0;
 }
 
+#ifdef ENABLE_PKCS11
+
 /**
  * gnutls_pubkey_import_pkcs11_url:
  * @key: A key of type #gnutls_pubkey_t
@@ -889,6 +897,8 @@ cleanup:
 
   return ret;
 }
+
+#endif /* ENABLE_PKCS11 */
 
 /**
  * gnutls_pubkey_import_rsa_raw:

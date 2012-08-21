@@ -22,8 +22,9 @@
 WFLAGS ?= --enable-gcc-warnings
 ADDFLAGS ?=
 CFGFLAGS ?= --enable-gtk-doc --enable-gtk-doc-pdf $(ADDFLAGS) $(WFLAGS)
+PACKAGE ?= gnutls
 
-INDENT_SOURCES = `find . -name \*.[ch] -o -name gnutls.h.in | grep -v -e ^./build-aux/ -e ^./lib/minitasn1/ -e ^./lib/build-aux/ -e ^./lib/gl/ -e ^./gl/ -e ^./libextra/gl/ -e ^./src/cfg/ -e -gaa.[ch] -e asn1_tab.c -e ^./tests/suite/`
+INDENT_SOURCES = `find . -name \*.[ch] -o -name gnutls.h.in | grep -v -e ^./build-aux/ -e ^./lib/minitasn1/ -e ^./lib/build-aux/ -e ^./gl/ -e ^./src/cfg/ -e -gaa.[ch] -e asn1_tab.c -e ^./tests/suite/`
 
 ifeq ($(.DEFAULT_GOAL),abort-due-to-no-makefile)
 .DEFAULT_GOAL := bootstrap
@@ -46,7 +47,7 @@ autoreconf:
 	done
 	mv lib/build-aux/config.rpath lib/build-aux/config.rpath-
 	test -f ./configure || autoreconf --install
-	test `hostname` = "gaggia" && cp lib/gl/m4/size_max.m4 lib/m4/ || true
+	test `hostname` = "gaggia" && cp gl/m4/size_max.m4 m4/ || true
 	mv lib/build-aux/config.rpath- lib/build-aux/config.rpath
 
 update-po: refresh-po
@@ -59,6 +60,8 @@ update-po: refresh-po
 bootstrap: autoreconf
 	./configure $(CFGFLAGS)
 
+#Two runs the first should add the LGPL components and the
+#second the components used by src/ files.
 glimport:
 	gnulib-tool --m4-base gl/m4 --add-import
 	cd lib && gnulib-tool --m4-base gl/m4 --add-import
@@ -89,7 +92,7 @@ mingw32: autoreconf
 # Release
 
 ChangeLog:
-	git log --pretty --numstat --summary --since="2005 November 07" -- | git2cl > ChangeLog
+	git log --pretty --numstat --summary --since="2008 November 07" -- | git2cl > ChangeLog
 	cat .clcopying >> ChangeLog
 
 tag = $(PACKAGE)_`echo $(VERSION) | sed 's/\./_/g'`
@@ -107,18 +110,19 @@ prepare:
 upload:
 	git push
 	git push --tags
-	build-aux/gnupload --to alpha.gnu.org:$(PACKAGE) $(distdir).tar.bz2
-	scp $(distdir).tar.bz2 $(distdir).tar.bz2.sig igloo.linux.gr:~ftp/pub/gnutls/devel/
-	ssh igloo.linux.gr 'cd ~ftp/pub/gnutls/devel/ && sha1sum *.tar.bz2 > CHECKSUMS'
+	build-aux/gnupload --to ftp.gnu.org:$(PACKAGE) $(distdir).tar.bz2
+	scp $(distdir).tar.bz2 $(distdir).tar.bz2.sig igloo.linux.gr:~ftp/pub/gnutls/
+	ssh igloo.linux.gr 'cd ~ftp/pub/gnutls/ && sha1sum *.tar.bz2 > CHECKSUMS'
 	cp $(distdir).tar.bz2 $(distdir).tar.bz2.sig ../releases/$(PACKAGE)/
 
 web:
+	echo generating documentation for $(PACKAGE)
 	cd doc && $(SHELL) ../build-aux/gendocs.sh \
 		--html "--css-include=texinfo.css" \
-		-o ../$(htmldir)/devel/manual/ $(PACKAGE) "$(PACKAGE_NAME)"
-	cd doc/doxygen && doxygen && cd ../.. && cp -v doc/doxygen/html/* $(htmldir)/devel/doxygen/ && cd doc/doxygen/latex && make refman.pdf && cd ../../../ && cp doc/doxygen/latex/refman.pdf $(htmldir)/devel/doxygen/$(PACKAGE).pdf
-	cp -v doc/reference/$(PACKAGE).pdf doc/reference/html/*.html doc/reference/html/*.png doc/reference/html/*.devhelp doc/reference/html/*.css $(htmldir)/devel/reference/
-	cp -v doc/cyclo/cyclo-$(PACKAGE).html $(htmldir)/cyclo/
+		-o ../$(htmldir)/manual/ $(PACKAGE) "$(PACKAGE_NAME)"
+	#cd doc/doxygen && doxygen && cd ../.. && cp -v doc/doxygen/html/* $(htmldir)/devel/doxygen/ && cd doc/doxygen/latex && make refman.pdf && cd ../../../ && cp doc/doxygen/latex/refman.pdf $(htmldir)/devel/doxygen/$(PACKAGE).pdf
+	cp -v doc/reference/html/*.html doc/reference/html/*.png doc/reference/html/*.devhelp doc/reference/html/*.css $(htmldir)/reference/
+	#cp -v doc/cyclo/cyclo-$(PACKAGE).html $(htmldir)/cyclo/
 
 upload-web:
 	cd $(htmldir) && \

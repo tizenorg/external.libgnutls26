@@ -113,12 +113,9 @@ gnutls_x509_privkey_cpy (gnutls_x509_privkey_t dst, gnutls_x509_privkey_t src)
 
   dst->params_size = src->params_size;
   dst->pk_algorithm = src->pk_algorithm;
-  dst->crippled = src->crippled;
 
-  if (!src->crippled)
+  switch (dst->pk_algorithm)
     {
-      switch (dst->pk_algorithm)
-        {
         case GNUTLS_PK_DSA:
           ret = _gnutls_asn1_encode_dsa (&dst->key, dst->params);
           if (ret < 0)
@@ -138,7 +135,6 @@ gnutls_x509_privkey_cpy (gnutls_x509_privkey_t dst, gnutls_x509_privkey_t src)
         default:
           gnutls_assert ();
           return GNUTLS_E_INVALID_REQUEST;
-        }
     }
 
   return 0;
@@ -638,15 +634,12 @@ gnutls_x509_privkey_import_rsa_raw2 (gnutls_x509_privkey_t key,
     }
   key->params_size = pk_params.params_nr;
 
-  if (!key->crippled)
+  ret = _gnutls_asn1_encode_rsa (&key->key, key->params);
+  if (ret < 0)
     {
-      ret = _gnutls_asn1_encode_rsa (&key->key, key->params);
-      if (ret < 0)
-        {
-          gnutls_assert ();
-          FREE_RSA_PRIVATE_PARAMS;
-          return ret;
-        }
+      gnutls_assert ();
+      FREE_RSA_PRIVATE_PARAMS;
+      return ret;
     }
 
   key->params_size = RSA_PRIVATE_PARAMS;
@@ -729,15 +722,12 @@ gnutls_x509_privkey_import_dsa_raw (gnutls_x509_privkey_t key,
       return GNUTLS_E_MPI_SCAN_FAILED;
     }
 
-  if (!key->crippled)
+  ret = _gnutls_asn1_encode_dsa (&key->key, key->params);
+  if (ret < 0)
     {
-      ret = _gnutls_asn1_encode_dsa (&key->key, key->params);
-      if (ret < 0)
-        {
-          gnutls_assert ();
-          FREE_DSA_PRIVATE_PARAMS;
-          return ret;
-        }
+      gnutls_assert ();
+      FREE_DSA_PRIVATE_PARAMS;
+      return ret;
     }
 
   key->params_size = DSA_PRIVATE_PARAMS;
@@ -798,7 +788,6 @@ gnutls_x509_privkey_export (gnutls_x509_privkey_t key,
                             size_t * output_data_size)
 {
   const char *msg;
-  int ret;
 
   if (key == NULL)
     {
@@ -812,33 +801,6 @@ gnutls_x509_privkey_export (gnutls_x509_privkey_t key,
     msg = PEM_KEY_DSA;
   else
     msg = NULL;
-
-  if (key->crippled)
-    {                           /* encode the parameters on the fly.
-                                 */
-      switch (key->pk_algorithm)
-        {
-        case GNUTLS_PK_DSA:
-          ret = _gnutls_asn1_encode_dsa (&key->key, key->params);
-          if (ret < 0)
-            {
-              gnutls_assert ();
-              return ret;
-            }
-          break;
-        case GNUTLS_PK_RSA:
-          ret = _gnutls_asn1_encode_rsa (&key->key, key->params);
-          if (ret < 0)
-            {
-              gnutls_assert ();
-              return ret;
-            }
-          break;
-        default:
-          gnutls_assert ();
-          return GNUTLS_E_INVALID_REQUEST;
-        }
-    }
 
   return _gnutls_x509_export_int (key->key, format, msg,
                                   output_data, output_data_size);
@@ -1141,11 +1103,12 @@ _gnutls_asn1_encode_rsa (ASN1_TYPE * c2, bigint_t * params)
   memset (&pk_params, 0, sizeof (pk_params));
 
   memset (&m, 0, sizeof (m));
-  memset (&p, 0, sizeof (e));
-  memset (&q, 0, sizeof (d));
   memset (&p, 0, sizeof (p));
   memset (&q, 0, sizeof (q));
+  memset (&p, 0, sizeof (p));
   memset (&u, 0, sizeof (u));
+  memset (&e, 0, sizeof (e));
+  memset (&d, 0, sizeof (d));
   memset (&exp1, 0, sizeof (exp1));
   memset (&exp2, 0, sizeof (exp2));
 
@@ -1499,26 +1462,24 @@ gnutls_x509_privkey_generate (gnutls_x509_privkey_t key,
     {
     case GNUTLS_PK_DSA:
       ret = _gnutls_dsa_generate_params (key->params, &params_len, bits);
-      if (params_len != DSA_PRIVATE_PARAMS)
-        {
-          gnutls_assert ();
-          ret = GNUTLS_E_INTERNAL_ERROR;
-        }
-
       if (ret < 0)
         {
           gnutls_assert ();
           return ret;
         }
 
-      if (!key->crippled)
+      if (params_len != DSA_PRIVATE_PARAMS)
         {
-          ret = _gnutls_asn1_encode_dsa (&key->key, key->params);
-          if (ret < 0)
-            {
-              gnutls_assert ();
-              goto cleanup;
-            }
+          gnutls_assert ();
+          ret = GNUTLS_E_INTERNAL_ERROR;
+          goto cleanup;
+        }
+
+      ret = _gnutls_asn1_encode_dsa (&key->key, key->params);
+      if (ret < 0)
+        {
+          gnutls_assert ();
+          goto cleanup;
         }
       key->params_size = params_len;
       key->pk_algorithm = GNUTLS_PK_DSA;
@@ -1526,25 +1487,24 @@ gnutls_x509_privkey_generate (gnutls_x509_privkey_t key,
       break;
     case GNUTLS_PK_RSA:
       ret = _gnutls_rsa_generate_params (key->params, &params_len, bits);
-      if (params_len != RSA_PRIVATE_PARAMS)
-        {
-          gnutls_assert ();
-          ret = GNUTLS_E_INTERNAL_ERROR;
-        }
       if (ret < 0)
         {
           gnutls_assert ();
           return ret;
         }
 
-      if (!key->crippled)
+      if (params_len != RSA_PRIVATE_PARAMS)
         {
-          ret = _gnutls_asn1_encode_rsa (&key->key, key->params);
-          if (ret < 0)
-            {
-              gnutls_assert ();
-              goto cleanup;
-            }
+          gnutls_assert ();
+          ret = GNUTLS_E_INTERNAL_ERROR;
+          goto cleanup;
+        }
+
+      ret = _gnutls_asn1_encode_rsa (&key->key, key->params);
+      if (ret < 0)
+        {
+          gnutls_assert ();
+          goto cleanup;
         }
 
       key->params_size = params_len;
@@ -1597,7 +1557,7 @@ gnutls_x509_privkey_get_key_id (gnutls_x509_privkey_t key,
   digest_hd_st hd;
   gnutls_datum_t der = { NULL, 0 };
 
-  if (key == NULL || key->crippled)
+  if (key == NULL)
     {
       gnutls_assert ();
       return GNUTLS_E_INVALID_REQUEST;
@@ -1899,8 +1859,8 @@ gnutls_x509_privkey_fix (gnutls_x509_privkey_t key)
       return GNUTLS_E_INVALID_REQUEST;
     }
 
-  if (!key->crippled)
-    asn1_delete_structure (&key->key);
+  asn1_delete_structure (&key->key);
+
   switch (key->pk_algorithm)
     {
     case GNUTLS_PK_DSA:

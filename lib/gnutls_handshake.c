@@ -123,6 +123,7 @@ resume_copy_required_values (gnutls_session_t session)
   memcpy (session->security_parameters.current_cipher_suite.suite,
           session->internals.resumed_security_parameters.current_cipher_suite.
           suite, 2);
+  session->internals.compression_method = session->internals.resumed_compression_method;
 
   _gnutls_epoch_set_cipher_suite (session, EPOCH_NEXT,
                                   &session->
@@ -322,7 +323,7 @@ _gnutls_tls_create_random (opaque * dst)
    * system's time.
    */
 
-  tim = time (NULL);
+  tim = gnutls_time (NULL);
   /* generate server random value */
   _gnutls_write_uint32 (tim, dst);
 
@@ -442,7 +443,7 @@ _gnutls_read_client_hello (gnutls_session_t session, opaque * data,
   _gnutls_tls_create_random (rnd);
   _gnutls_set_server_random (session, rnd);
 
-  session->security_parameters.timestamp = time (NULL);
+  session->security_parameters.timestamp = gnutls_time (NULL);
 
   DECR_LEN (len, 1);
   session_id_len = data[pos++];
@@ -2091,7 +2092,7 @@ _gnutls_send_client_hello (gnutls_session_t session, int again)
 
       /* In order to know when this session was initiated.
        */
-      session->security_parameters.timestamp = time (NULL);
+      session->security_parameters.timestamp = gnutls_time (NULL);
 
       /* Generate random data 
        */
@@ -2855,7 +2856,6 @@ _gnutls_send_handshake_final (gnutls_session_t session, int init)
     case STATE20:
 
       STATE = STATE20;
-
       ret = _gnutls_handshake_io_write_flush (session);
       if (ret < 0)
         {

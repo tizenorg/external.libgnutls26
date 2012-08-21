@@ -216,6 +216,9 @@ _gnutls_pkcs1_rsa_decrypt (gnutls_datum_t * plaintext,
   size_t esize, mod_bits;
   gnutls_pk_params_st pk_params;
 
+  if (params_len > GNUTLS_MAX_PK_PARAMS)
+    return gnutls_assert_val(GNUTLS_E_INTERNAL_ERROR);
+
   for (i = 0; i < params_len; i++)
     pk_params.params[i] = params[i];
   pk_params.params_nr = params_len;
@@ -544,6 +547,7 @@ _generate_params (int algo, bigint_t * resarr, unsigned int *resarr_len,
     }
   else
     {
+      gnutls_pk_params_release(&params);
       gnutls_assert ();
       return GNUTLS_E_INVALID_REQUEST;
     }

@@ -26,7 +26,6 @@
 #include <config.h>
 #endif
 #include <stdio.h>
-#include <time.h>
 
 #include "opencdk.h"
 #include "main.h"
@@ -211,7 +210,7 @@ literal_encode (void *data, FILE * in, FILE * out)
   memcpy (pt->name, pfx->filename, filelen);
   pt->namelen = filelen;
   pt->name[pt->namelen] = '\0';
-  pt->timestamp = (u32) time (NULL);
+  pt->timestamp = (u32) gnutls_time (NULL);
   pt->mode = intmode_to_char (pfx->mode);
   pt->len = cdk_stream_get_length (si);
   pt->buf = si;
@@ -262,10 +261,12 @@ text_encode (void *data, FILE * in, FILE * out)
   /* FIXME: This code does not work for very long lines. */
   while (!feof (in))
     {
-      s = fgets (buf, DIM (buf) - 1, in);
+      /* give space for trim_string \r\n */
+      s = fgets (buf, DIM (buf) - 3, in);
       if (!s)
         break;
-      _cdk_trim_string (buf, 1);
+      _cdk_trim_string (buf);
+      strcat (buf, "\r\n");
       fwrite (buf, 1, strlen (buf), out);
     }
 
@@ -288,7 +289,7 @@ text_decode (void *data, FILE * in, FILE * out)
       s = fgets (buf, DIM (buf) - 1, in);
       if (!s)
         break;
-      _cdk_trim_string (buf, 0);
+      _cdk_trim_string (buf);
       fwrite (buf, 1, strlen (buf), out);
       fwrite (tfx->lf, 1, strlen (tfx->lf), out);
     }

@@ -1,6 +1,6 @@
 /* A GNU-like <string.h>.
 
-   Copyright (C) 1995-1996, 2001-2011 Free Software Foundation, Inc.
+   Copyright (C) 1995-1996, 2001-2012 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -13,10 +13,9 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _GL_STRING_H
+#ifndef _@GUARD_PREFIX@_STRING_H
 
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
@@ -26,8 +25,8 @@
 /* The include_next requires a split double-inclusion guard.  */
 #@INCLUDE_NEXT@ @NEXT_STRING_H@
 
-#ifndef _GL_STRING_H
-#define _GL_STRING_H
+#ifndef _@GUARD_PREFIX@_STRING_H
+#define _@GUARD_PREFIX@_STRING_H
 
 /* NetBSD 5.0 mis-defines NULL.  */
 #include <stddef.h>
@@ -57,6 +56,36 @@
 /* The definition of _GL_ARG_NONNULL is copied here.  */
 
 /* The definition of _GL_WARN_ON_USE is copied here.  */
+
+
+/* Find the index of the least-significant set bit.  */
+#if @GNULIB_FFSL@
+# if !@HAVE_FFSL@
+_GL_FUNCDECL_SYS (ffsl, int, (long int i));
+# endif
+_GL_CXXALIAS_SYS (ffsl, int, (long int i));
+_GL_CXXALIASWARN (ffsl);
+#elif defined GNULIB_POSIXCHECK
+# undef ffsl
+# if HAVE_RAW_DECL_FFSL
+_GL_WARN_ON_USE (ffsl, "ffsl is not portable - use the ffsl module");
+# endif
+#endif
+
+
+/* Find the index of the least-significant set bit.  */
+#if @GNULIB_FFSLL@
+# if !@HAVE_FFSLL@
+_GL_FUNCDECL_SYS (ffsll, int, (long long int i));
+# endif
+_GL_CXXALIAS_SYS (ffsll, int, (long long int i));
+_GL_CXXALIASWARN (ffsll);
+#elif defined GNULIB_POSIXCHECK
+# undef ffsll
+# if HAVE_RAW_DECL_FFSLL
+_GL_WARN_ON_USE (ffsll, "ffsll is not portable - use the ffsll module");
+# endif
+#endif
 
 
 /* Return the first instance of C within N bytes of S, or NULL.  */
@@ -277,17 +306,28 @@ _GL_WARN_ON_USE (strchr, "strchr cannot work correctly on character strings "
 
 /* Find the first occurrence of C in S or the final NUL byte.  */
 #if @GNULIB_STRCHRNUL@
-# if ! @HAVE_STRCHRNUL@
+# if @REPLACE_STRCHRNUL@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define strchrnul rpl_strchrnul
+#  endif
+_GL_FUNCDECL_RPL (strchrnul, char *, (const char *__s, int __c_in)
+                                     _GL_ATTRIBUTE_PURE
+                                     _GL_ARG_NONNULL ((1)));
+_GL_CXXALIAS_RPL (strchrnul, char *,
+                  (const char *str, int ch));
+# else
+#  if ! @HAVE_STRCHRNUL@
 _GL_FUNCDECL_SYS (strchrnul, char *, (char const *__s, int __c_in)
                                      _GL_ATTRIBUTE_PURE
                                      _GL_ARG_NONNULL ((1)));
-# endif
+#  endif
   /* On some systems, this function is defined as an overloaded function:
        extern "C++" { const char * std::strchrnul (const char *, int); }
        extern "C++" { char * std::strchrnul (char *, int); }  */
 _GL_CXXALIAS_SYS_CAST2 (strchrnul,
                         char *, (char const *__s, int __c_in),
                         char const *, (char const *__s, int __c_in));
+# endif
 # if ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 10) && !defined __UCLIBC__) \
      && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
 _GL_CXXALIASWARN1 (strchrnul, char *, (char *__s, int __c_in));
@@ -725,9 +765,9 @@ _GL_CXXALIASWARN (mbschr);
    and return a pointer to it.  Return NULL if C is not found in STRING.
    Unlike strrchr(), this function works correctly in multibyte locales with
    encodings such as GB18030.  */
-# if defined __hpux
+# if defined __hpux || defined __INTERIX
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
-#   define mbsrchr rpl_mbsrchr /* avoid collision with HP-UX function */
+#   define mbsrchr rpl_mbsrchr /* avoid collision with system function */
 #  endif
 _GL_FUNCDECL_RPL (mbsrchr, char *, (const char *string, int c)
                                    _GL_ARG_NONNULL ((1)));
@@ -966,5 +1006,5 @@ _GL_WARN_ON_USE (strverscmp, "strverscmp is unportable - "
 #endif
 
 
-#endif /* _GL_STRING_H */
-#endif /* _GL_STRING_H */
+#endif /* _@GUARD_PREFIX@_STRING_H */
+#endif /* _@GUARD_PREFIX@_STRING_H */

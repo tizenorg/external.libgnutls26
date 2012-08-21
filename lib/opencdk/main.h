@@ -106,10 +106,6 @@ FILE *_cdk_tmpfile (void);
     _cdk_memistr((haystack), strlen (haystack), (needle))
 
 /*-- proc-packet.c --*/
-cdk_error_t _cdk_proc_packets (cdk_ctx_t hd, cdk_stream_t inp,
-                               cdk_stream_t data,
-                               const char *output, cdk_stream_t outstream,
-                               digest_hd_st * md);
 cdk_error_t _cdk_pkt_write2 (cdk_stream_t out, int pkttype, void *pktctx);
 
 /*-- pubkey.c --*/
@@ -158,7 +154,7 @@ cdk_error_t _cdk_keydb_check_userid (cdk_keydb_hd_t hd, u32 * keyid,
 
 /*-- sign.c --*/
 int _cdk_sig_hash_for (cdk_pkt_pubkey_t pk);
-void _cdk_trim_string (char *s, int canon);
+void _cdk_trim_string (char *s);
 cdk_error_t _cdk_sig_create (cdk_pkt_pubkey_t pk, cdk_pkt_signature_t sig);
 cdk_error_t _cdk_sig_complete (cdk_pkt_signature_t sig, cdk_pkt_seckey_t sk,
                                digest_hd_st * hd);
@@ -178,10 +174,6 @@ int _cdk_stream_get_blockmode (cdk_stream_t s);
 int _cdk_stream_puts (cdk_stream_t s, const char *buf);
 cdk_error_t _cdk_stream_fpopen (FILE * fp, unsigned write_mode,
                                 cdk_stream_t * ret_out);
-
-/*-- verify.c --*/
-void _cdk_result_verify_free (cdk_verify_result_t res);
-cdk_verify_result_t _cdk_result_verify_new (void);
 
 
 /*-- read-packet.c --*/

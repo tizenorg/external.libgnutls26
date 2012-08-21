@@ -84,7 +84,7 @@ int
 _gnutls_x509_crt_cpy (gnutls_x509_crt_t dest, gnutls_x509_crt_t src)
 {
   int ret;
-  size_t der_size;
+  size_t der_size = 0;
   opaque *der;
   gnutls_datum_t tmp;
 
@@ -123,7 +123,6 @@ _gnutls_x509_crt_cpy (gnutls_x509_crt_t dest, gnutls_x509_crt_t src)
     }
 
   return 0;
-
 }
 
 /**
@@ -246,6 +245,52 @@ cleanup:
   if (need_free)
     _gnutls_free_datum (&_data);
   return result;
+}
+
+static int check_if_sorted(gnutls_x509_crt_t * crt, int nr)
+{
+char prev_dn[MAX_DN];
+char dn[MAX_DN];
+size_t prev_dn_size, dn_size;
+int i, ret;
+
+  /* check if the X.509 list is ordered */
+  if (nr > 1)
+    {
+
+      for (i=0;i<nr;i++)
+        {
+          if (i>0)
+            {
+              dn_size = sizeof(dn);
+              ret = gnutls_x509_crt_get_dn(crt[i], dn, &dn_size);
+              if (ret < 0)
+                {
+                  ret = gnutls_assert_val(ret);
+                  goto cleanup;
+                }
+              
+              if (dn_size != prev_dn_size || memcmp(dn, prev_dn, dn_size) != 0)
+                {
+                  ret = gnutls_assert_val(GNUTLS_E_CERTIFICATE_LIST_UNSORTED);
+                  goto cleanup;
+                }
+            }
+
+          prev_dn_size = sizeof(prev_dn);
+          ret = gnutls_x509_crt_get_issuer_dn(crt[i], prev_dn, &prev_dn_size);
+          if (ret < 0)
+            {
+              ret = gnutls_assert_val(ret);
+              goto cleanup;
+            }
+        }
+    }
+
+  ret = 0;
+
+cleanup:
+  return ret;
 }
 
 
@@ -1003,7 +1048,7 @@ _gnutls_parse_general_name (ASN1_TYPE src, const char *src_name,
               size_t orig_name_size = *name_size;
 
               result = asn1_create_element
-                (_gnutls_get_pkix (), "PKIX1.XmppAddr", &c2);
+                (_gnutls_get_pkix (), "PKIX1.UTF8String", &c2);
               if (result != ASN1_SUCCESS)
                 {
                   gnutls_assert ();
@@ -3076,6 +3121,12 @@ cleanup:
  * to the native gnutls_x509_crt_t format. The output will be stored
  * in @certs.  They will be automatically initialized.
  *
+ * The flag %GNUTLS_X509_CRT_LIST_IMPORT_FAIL_IF_EXCEED will cause
+ * import to fail if the certificates in the provided buffer are more
+ * than the available structures. The %GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED
+ * flag will cause the function to fail if the provided list is not
+ * sorted from subject to issuer.
+ *
  * If the Certificate is PEM encoded it should have a header of "X509
  * CERTIFICATE", or "CERTIFICATE".
  *
@@ -3130,10 +3181,7 @@ gnutls_x509_crt_list_import (gnutls_x509_crt_t * certs,
                   PEM_CERT_SEP2, sizeof (PEM_CERT_SEP2) - 1);
 
   if (ptr == NULL)
-    {
-      gnutls_assert ();
-      return GNUTLS_E_BASE64_DECODING_ERROR;
-    }
+    return gnutls_assert_val(GNUTLS_E_NO_CERTIFICATE_FOUND);
 
   count = 0;
 
@@ -3194,6 +3242,16 @@ gnutls_x509_crt_list_import (gnutls_x509_crt_t * certs,
   while (ptr != NULL);
 
   *cert_max = count;
+
+  if (flags & GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED)
+    {
+      ret = check_if_sorted(certs, *cert_max);
+      if (ret < 0)
+        {
+          gnutls_assert();
+          goto error;
+        }
+    }
 
   if (nocopy == 0)
     return count;

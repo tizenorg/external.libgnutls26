@@ -61,7 +61,7 @@ gnutls_openpgp_crt_verify_ring (gnutls_openpgp_crt_t key,
                                 gnutls_openpgp_keyring_t keyring,
                                 unsigned int flags, unsigned int *verify)
 {
-  gnutls_openpgp_keyid_t id;
+  uint8_t id[GNUTLS_OPENPGP_KEYID_SIZE];
   cdk_error_t rc;
   int status;
 
@@ -136,6 +136,8 @@ gnutls_openpgp_crt_verify_self (gnutls_openpgp_crt_t key,
 {
   int status;
   cdk_error_t rc;
+
+  *verify = 0;
 
   rc = cdk_pk_check_self_sig (key->knode, &status);
   if (rc || status != CDK_KEY_VALID)

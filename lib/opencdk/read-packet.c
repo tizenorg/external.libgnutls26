@@ -527,7 +527,7 @@ read_attribute (cdk_stream_t inp, size_t pktlen, cdk_pkt_userid_t attr)
   p++;
   len--;
 
-  if (pktlen - (len + 1) > 0)
+  if (len >= pktlen)
     return CDK_Inv_Packet;
   attr->attrib_img = cdk_calloc (1, len);
   if (!attr->attrib_img)
@@ -676,7 +676,7 @@ parse_sig_subpackets (cdk_pkt_signature_t sig)
       else if (node->type == CDK_SIGSUBPKT_SIG_EXPIRE && node->size >= 4)
         {
           sig->expiredate = _cdk_buftou32 (node->d);
-          if (sig->expiredate > 0 && sig->expiredate < (u32) time (NULL))
+          if (sig->expiredate > 0 && sig->expiredate < (u32) gnutls_time (NULL))
             sig->flags.expired = 1;
         }
       else if (node->type == CDK_SIGSUBPKT_POLICY)

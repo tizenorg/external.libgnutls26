@@ -625,29 +625,6 @@ extern "C"
 /* Set the mode and the digest for the S2K operation. */
 #define cdk_handle_set_s2k(a, val1, val2) \
   cdk_handle_control ((a), CDK_CTLF_SET, CDK_CTL_S2K, (val1), (val2))
-
-
-/* This context holds all information of the verification process. */
-  struct cdk_verify_result_s
-  {
-    int sig_ver;                /* Version of the signature. */
-    int sig_status;             /* The status (GOOD, BAD) of the signature */
-    int sig_flags;              /* May contain expired or revoked flags */
-    unsigned int keyid[2];      /* The issuer key ID */
-    unsigned int created;       /* Timestamp when the sig was created. */
-    unsigned int expires;
-    int pubkey_algo;
-    int digest_algo;
-    char *user_id;              /* NULL or user ID which issued the signature. */
-    char *policy_url;           /* If set, the policy the sig was created under. */
-    size_t sig_len;             /* Size of the signature data inbits. */
-    unsigned char *sig_data;    /* Raw signature data. */
-  };
-  typedef struct cdk_verify_result_s *cdk_verify_result_t;
-
-/* Return the verify result. Do not free the data. */
-  cdk_verify_result_t cdk_handle_verify_get_result (cdk_ctx_t hd);
-
 /* Raw packet routines. */
 
 /* Allocate a new packet or a new packet with the given packet type. */
@@ -1032,30 +1009,6 @@ extern "C"
                                   unsigned char **outbuf, size_t * outsize,
                                   int modval);
 
-/* Sign the stream @INP. Optionally, the output will be encrypted
-   if @REMUSR is not NULL and the @ENCRYPTFLAG is set.
-   The output will be written to @OUT.
-   @LOCUSR contains one ore more pattern for the secret key(s) to use. */
-  cdk_error_t cdk_stream_sign (cdk_ctx_t hd, cdk_stream_t inp,
-                               cdk_stream_t out, cdk_strlist_t locusr,
-                               cdk_strlist_t remusr, int encryptflag,
-                               int sigmode);
-
-/* Same as the function above but it works on files. */
-  cdk_error_t cdk_file_sign (cdk_ctx_t hd, cdk_strlist_t locusr,
-                             cdk_strlist_t remusr,
-                             const char *file, const char *output,
-                             int sigmode, int encryptflag);
-
-  cdk_error_t cdk_stream_verify (cdk_ctx_t hd, cdk_stream_t inp,
-                                 cdk_stream_t data, cdk_stream_t out);
-
-/* Verify the given file @FILE. For a detached signature, @DATA_FILE
-   contains the actual file data and @FILE is only the signature.
-   If the @OUTPUT is not NULL, the plaintext will be written to this file. */
-  cdk_error_t cdk_file_verify (cdk_ctx_t hd, const char *file,
-                               const char *data_file, const char *output);
-
   int cdk_trustdb_get_validity (cdk_stream_t inp, cdk_pkt_userid_t id,
                                 int *r_val);
   int cdk_trustdb_get_ownertrust (cdk_stream_t inp, cdk_pubkey_t pk,
@@ -1063,7 +1016,6 @@ extern "C"
 
   void cdk_strlist_free (cdk_strlist_t sl);
   cdk_strlist_t cdk_strlist_add (cdk_strlist_t * list, const char *string);
-  cdk_strlist_t cdk_strlist_next (cdk_strlist_t root, const char **r_str);
   const char *cdk_check_version (const char *req_version);
 /* UTF8 */
   char *cdk_utf8_encode (const char *string);

@@ -57,6 +57,9 @@
 #include <system.h>
 
 #include <errno.h>
+#ifdef _WIN32
+# include <windows.h>
+#endif
 
 #ifndef EAGAIN
 #define EAGAIN EWOULDBLOCK
@@ -115,7 +118,24 @@ gnutls_transport_set_errno (gnutls_session_t session, int err)
 void
 gnutls_transport_set_global_errno (int err)
 {
+#ifdef _WIN32
+  /* Keep this in sync with system_errno */
+  switch (err)
+    {
+    case EAGAIN:
+      SetLastError (WSAEWOULDBLOCK);
+      break;
+    case EINTR:
+      SetLastError (WSAEINTR);
+      break;
+    default:
+      /* We don't care about anything else */
+      SetLastError (NO_ERROR);
+      break;
+    }
+#else
   errno = err;
+#endif
 }
 
 /* Buffers received packets of type APPLICATION DATA and
@@ -190,12 +210,6 @@ _gnutls_record_buffer_get_size (content_type_t type, gnutls_session_t session)
  *
  * This function checks if there are any data to receive in the gnutls
  * buffers.
- *
- * Note that you could also use select() to check for data in a TCP
- * connection, instead of this function.  GnuTLS leaves some data in
- * the tcp buffer in order for select to work. However the select() 
- * alternative is not recommended and will be deprecated in later
- * GnuTLS revisions.
  *
  * Returns: the size of that data or 0.
  **/
@@ -362,7 +376,7 @@ static ssize_t
 _gnutls_writev_emu (gnutls_session_t session, const giovec_t * giovec,
                     int giovec_cnt)
 {
-  int ret, j = 0;
+  int ret = 0, j = 0;
   gnutls_transport_ptr_t fd = session->internals.transport_send_ptr;
   void *iptr;
   size_t sizeOfPtr;
@@ -379,6 +393,9 @@ _gnutls_writev_emu (gnutls_session_t session, const giovec_t * giovec,
         break;
 
       total += ret;
+
+      if (ret != giovec[j].iov_len)
+        break;
     }
 
   if (total > 0)
@@ -657,6 +674,10 @@ _gnutls_io_write_buffered (gnutls_session_t session,
 {
   mbuffer_head_st *const send_buffer = &session->internals.record_send_buffer;
 
+  /* to know where the procedure was interrupted.
+   */
+  session->internals.direction = 1;
+
   _mbuffer_enqueue (send_buffer, bufel);
 
   _gnutls_write_log
@@ -703,6 +724,12 @@ _gnutls_io_write_flush (gnutls_session_t session)
           gnutls_assert ();
           return GNUTLS_E_INTERNAL_ERROR;
         }
+    }
+
+  if (tosend == 0)
+    {
+      gnutls_assert();
+      return 0;
     }
 
   ret = _gnutls_writev (session, iovec, i);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libgnutls-2.8.5\n"
 "Report-Msgid-Bugs-To: bug-gnutls@gnu.org\n"
-"POT-Creation-Date: 2011-03-31 19:54+0900\n"
+"POT-Creation-Date: 2012-06-10 12:53+0200\n"
 "PO-Revision-Date: 2010-01-04 15:09+0100\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
@@ -551,7 +551,13 @@ msgstr ""
 msgid "PKCS #11 user error"
 msgstr ""
 
-#: gnutls_errors.c:409
+#: gnutls_errors.c:324
+msgid ""
+"The provided X.509 certificate list is not sorted (in subject to issuer "
+"order)"
+msgstr ""
+
+#: gnutls_errors.c:411
 msgid "(unknown error code)"
 msgstr "(nieznany kod b³êdu)"
 

@@ -28,6 +28,7 @@
 #include <gnutls_num.h>
 #include <gnutls_str.h>
 #include <stdarg.h>
+#include <c-ctype.h>
 
 /* These function are like strcat, strcpy. They only
  * do bound checking (they shouldn't cause buffer overruns),
@@ -343,7 +344,7 @@ _gnutls_buffer_delete_data (gnutls_buffer_st * dest, int pos, size_t str_size)
 
 
 int
-_gnutls_buffer_escape (gnutls_buffer_st * dest,
+_gnutls_buffer_escape (gnutls_buffer_st * dest, int all,
                        const char *const invalid_chars)
 {
   int rv = -1;
@@ -353,8 +354,8 @@ _gnutls_buffer_escape (gnutls_buffer_st * dest,
   while (pos < dest->length)
     {
 
-      if (dest->data[pos] == '\\' || strchr (invalid_chars, dest->data[pos])
-          || !isgraph (dest->data[pos]))
+      if (all != 0 || (dest->data[pos] == '\\' || strchr (invalid_chars, dest->data[pos])
+          || !c_isgraph (dest->data[pos])))
         {
 
           snprintf (t, sizeof (t), "%%%.2X", (unsigned int) dest->data[pos]);
@@ -366,9 +367,10 @@ _gnutls_buffer_escape (gnutls_buffer_st * dest,
               rv = -1;
               goto cleanup;
             }
-
+          pos+=3;
         }
-      pos++;
+      else
+        pos++;
     }
 
   rv = 0;
@@ -520,14 +522,20 @@ _gnutls_hex2bin (const opaque * hex_data, int hex_size, opaque * bin_data,
  * return 1 on success or 0 on error
  *
  * note: certnamesize is required as X509 certs can contain embedded NULs in
- * the strings such as CN or subjectAltName
+ * the strings such as CN or subjectAltName.
+ *
+ * @level: is used for recursion. Use 0 when you call this function.
  */
 int
 _gnutls_hostname_compare (const char *certname,
-                          size_t certnamesize, const char *hostname)
+                          size_t certnamesize, const char *hostname, int level)
 {
+
+  if (level > 5)
+    return 0;
+
   /* find the first different character */
-  for (; *certname && *hostname && toupper (*certname) == toupper (*hostname);
+  for (; *certname && *hostname && c_toupper (*certname) == c_toupper (*hostname);
        certname++, hostname++, certnamesize--)
     ;
 
@@ -545,7 +553,7 @@ _gnutls_hostname_compare (const char *certname,
       while (1)
         {
           /* Use a recursive call to allow multiple wildcards */
-          if (_gnutls_hostname_compare (certname, certnamesize, hostname))
+          if (_gnutls_hostname_compare (certname, certnamesize, hostname, level+1))
             return 1;
 
           /* wildcards are only allowed to match a single domain

@@ -50,7 +50,7 @@
 #ifdef _WIN32
 
 int
-system_errno (gnutls_transport_ptr)
+system_errno (gnutls_transport_ptr p)
 {
   int tmperr = WSAGetLastError ();
   int ret = 0;
@@ -115,7 +115,6 @@ static int
 gnutls_system_mutex_init (void **priv)
 {
   CRITICAL_SECTION *lock = malloc (sizeof (CRITICAL_SECTION));
-  int ret;
 
   if (lock == NULL)
     return GNUTLS_E_MEMORY_ERROR;
@@ -260,6 +259,7 @@ _gnutls_atfork (void (*prepare) (void), void (*parent) (void),
 
 #endif /* NO_LOCKS */
 
+gnutls_time_func gnutls_time = time;
 mutex_init_func gnutls_mutex_init = gnutls_system_mutex_init;
 mutex_deinit_func gnutls_mutex_deinit = gnutls_system_mutex_deinit;
 mutex_lock_func gnutls_mutex_lock = gnutls_system_mutex_lock;

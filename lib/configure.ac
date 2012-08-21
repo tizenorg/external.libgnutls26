@@ -22,8 +22,8 @@ dnl Process this file with autoconf to produce a configure script.
 # MA 02110-1301, USA
 
 AC_PREREQ(2.61)
-AC_INIT([libgnutls], [2.11.7], [bug-gnutls@gnu.org])
-#AC_CONFIG_AUX_DIR([build-aux])
+AC_INIT([libgnutls], [2.12.20], [bug-gnutls@gnu.org])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.10 -Wall -Werror -Wno-override])
@@ -33,7 +33,7 @@ AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 lgl_EARLY
 
-#AC_LIBTOOL_WIN32_DLL
+AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
 LIBGNUTLS_HOOKS
@@ -80,16 +80,48 @@ else
  AC_MSG_RESULT(no)
 fi
 
+PKG_CHECK_EXISTS(zlib, ZLIB_HAS_PKGCONFIG=y, ZLIB_HAS_PKGCONFIG=n)
+
 if test x$ac_zlib != xno; then
-  if test x$GNUTLS_REQUIRES_PRIVATE = x; then
-    GNUTLS_REQUIRES_PRIVATE="Requires.private: zlib"
+  if test "$ZLIB_HAS_PKGCONFIG" = "y" ; then
+    if test "x$GNUTLS_REQUIRES_PRIVATE" = "x"; then
+      GNUTLS_REQUIRES_PRIVATE="Requires.private: zlib"
+    else
+      GNUTLS_REQUIRES_PRIVATE="$GNUTLS_REQUIRES_PRIVATE , zlib"
+    fi
   else
-    GNUTLS_REQUIRES_PRIVATE="$GNUTLS_REQUIRES_PRIVATE , zlib"
+    GNUTLS_ZLIB_LIBS_PRIVATE="$LTLIBZ"
   fi
 fi
 AC_SUBST(GNUTLS_REQUIRES_PRIVATE)
+AC_SUBST(GNUTLS_ZLIB_LIBS_PRIVATE)
 
-#lgl_INIT
+dnl Check for p11-kit
+AC_ARG_WITH(p11-kit,
+	AS_HELP_STRING([--without-p11-kit],
+		[Build without p11-kit and PKCS#11 support]))
+AM_CONDITIONAL(ENABLE_PKCS11, test "$with_p11_kit" != "no")
+if test "$with_p11_kit" != "no"; then
+	PKG_CHECK_MODULES(P11_KIT, [p11-kit-1 >= 0.4], [with_p11_kit=yes], [with_p11_kit=no])
+	if test "$with_p11_kit" != "no";then
+		AC_DEFINE([ENABLE_PKCS11], 1, [Build PKCS#11 support])
+		CFLAGS="$CFLAGS $P11_KIT_CFLAGS"
+		LIBS="$LIBS $P11_KIT_LIBS"
+		if test "x$GNUTLS_REQUIRES_PRIVATE" = "x"; then
+			GNUTLS_REQUIRES_PRIVATE="Requires.private: p11-kit-1"
+		else
+		  	GNUTLS_REQUIRES_PRIVATE="${GNUTLS_REQUIRES_PRIVATE}, p11-kit-1"
+		fi
+	else
+	        AC_MSG_WARN([[
+*** 
+*** p11-kit was not found. PKCS #11 support will be disabled.
+*** You may get it from http://p11-glue.freedesktop.org/p11-kit.html
+*** ]])
+	fi
+fi
+
+lgl_INIT
 
 AC_CHECK_FUNCS(getrusage,,)
 AC_LIB_HAVE_LINKFLAGS(pthread,, [#include <pthread.h>], [pthread_mutex_lock (0);])
@@ -112,6 +144,7 @@ AC_CONFIG_FILES([
   Makefile
   gnutls.pc
   gl/Makefile
+  gl/tests/Makefile
   includes/Makefile
   includes/gnutls/gnutls.h
   minitasn1/Makefile
@@ -123,5 +156,3 @@ AC_CONFIG_FILES([
   nettle/Makefile
 ])
 AC_OUTPUT
-
-#  gl/tests/Makefile

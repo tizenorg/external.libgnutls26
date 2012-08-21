@@ -127,7 +127,7 @@ int
 _gnutls_sign_algorithm_parse_data (gnutls_session_t session,
                                    const opaque * data, size_t data_size)
 {
-  int sig, i;
+  int sig, i, hash;
   sig_ext_st *priv;
   extension_priv_data_t epriv;
 
@@ -150,8 +150,13 @@ _gnutls_sign_algorithm_parse_data (gnutls_session_t session,
        _gnutls_debug_log ("EXT[SIGA]: rcvd signature algo (%d.%d) %s\n", aid.hash_algorithm, 
          aid.sign_algorithm, gnutls_sign_get_name(sig));
 
+
       if (sig != GNUTLS_SIGN_UNKNOWN)
         {
+          hash = _gnutls_sign_get_hash_algorithm(sig);
+          if (hash != GNUTLS_DIG_SHA1 && hash != GNUTLS_DIG_SHA256)
+            continue;
+
           priv->sign_algorithms[priv->sign_algorithms_size++] = sig;
           if (priv->sign_algorithms_size == MAX_SIGNATURE_ALGORITHMS)
             break;
@@ -249,9 +254,11 @@ _gnutls_signature_algorithm_send_params (gnutls_session_t session,
 int cert_compatible_with_sig(gnutls_cert* cert, gnutls_protocol_t ver, 
   gnutls_sign_algorithm_t sign)
 {
+unsigned int hash_len;
+
   if (cert->subject_pk_algorithm == GNUTLS_PK_DSA)
     { /* override */
-      int hash_algo = _gnutls_dsa_q_to_hash (cert->params[1]);
+      int hash_algo = _gnutls_dsa_q_to_hash (cert->params[1], &hash_len);
 
       /* DSA keys over 1024 bits cannot be used with TLS 1.x, x<2 */
       if (!_gnutls_version_has_selectable_sighash (ver))
@@ -261,7 +268,7 @@ int cert_compatible_with_sig(gnutls_cert* cert, gnutls_protocol_t ver,
         }
       else
         {
-          if (_gnutls_sign_get_hash_algorithm(sign) != hash_algo)
+          if (_gnutls_hash_get_algo_len(_gnutls_sign_get_hash_algorithm(sign)) < hash_len)
             return GNUTLS_E_UNWANTED_ALGORITHM;
         }
         

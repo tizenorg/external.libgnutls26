@@ -162,7 +162,6 @@ _gnutls_gen_dh_common_client_kx_int (gnutls_session_t session, opaque ** data, g
   session->key->KEY =
     gnutls_calc_dh_key (session->key->client_Y, x, session->key->client_p);
 
-  _gnutls_mpi_release (&x);
   if (session->key->KEY == NULL)
     {
       gnutls_assert ();
@@ -204,13 +203,17 @@ _gnutls_gen_dh_common_client_kx_int (gnutls_session_t session, opaque ** data, g
       goto error;
     }
 
-  return n_X + 2;
+  ret = n_X + 2;
 
 error:
   _gnutls_mpi_release (&x);
   _gnutls_mpi_release (&X);
-  gnutls_free (*data);
-  *data = NULL;
+  
+  if (ret < 0)
+    {
+      gnutls_free (*data);
+      *data = NULL;
+    }
   return ret;
 }
 

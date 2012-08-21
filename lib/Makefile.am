@@ -22,10 +22,8 @@
 # MA 02110-1301, USA
 
 ACLOCAL_AMFLAGS = -I m4 -I gl/m4
-#ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = gl po includes x509
-#SUBDIRS = po includes x509
 if ENABLE_MINITASN1
 SUBDIRS += minitasn1
 endif
@@ -40,9 +38,6 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/includes			\
 	-I$(builddir)/includes			\
 	-I$(srcdir)/x509
-
-
-
 
 if ENABLE_OPENPGP
 SUBDIRS += opencdk
@@ -85,9 +80,11 @@ COBJECTS = gnutls_record.c gnutls_compress.c debug.c gnutls_cipher.c	\
 	auth_dh_common.c gnutls_helper.c gnutls_supplemental.c		\
 	crypto.c random.c  ext_signature.c cryptodev.c system.c \
 	crypto-api.c ext_safe_renegotiation.c gnutls_privkey.c \
-	pkcs11.c pkcs11_privkey.c gnutls_pubkey.c pkcs11_write.c locks.c \
-	pkcs11_secret.c
+	gnutls_pubkey.c locks.c
 
+if ENABLE_PKCS11
+COBJECTS += pkcs11.c pkcs11_privkey.c pkcs11_write.c pkcs11_secret.c
+endif
 
 if ENABLE_NETTLE
 SUBDIRS += nettle
@@ -110,12 +107,10 @@ HFILES = abstract_int.h debug.h gnutls_compress.h gnutls_cipher.h	\
 	gnutls_helper.h auth_psk.h auth_psk_passwd.h			\
 	gnutls_supplemental.h crypto.h random.h system.h		\
 	ext_session_ticket.h ext_signature.h gnutls_cryptodev.h		\
-	ext_safe_renegotiation.h locks.h gnutls_mbuffers.h		\
-	pkcs11_int.h
+	ext_safe_renegotiation.h locks.h gnutls_mbuffers.h
 
-if ENABLE_LOCAL_PAKCHOIS
-COBJECTS+=pakchois/pakchois.c pakchois/errors.c pakchois/dlopen.c
-HFILES+=pakchois/pakchois.h pakchois/pakchois11.h pakchois/dlopen.h
+if ENABLE_PKCS11
+HFILES += pkcs11_int.h
 endif
 
 # Separate so we can create the documentation
@@ -127,20 +122,20 @@ libgnutls_la_SOURCES = $(HFILES) $(COBJECTS) $(SRP_COBJECTS)	\
 libgnutls_la_LDFLAGS = -no-undefined \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-#libgnutls_la_LIBADD = x509/libgnutls_x509.la 
 libgnutls_la_LIBADD = gl/liblgnu.la x509/libgnutls_x509.la \
-	$(LTLIBZ)  $(LTLIBINTL) $(LIBSOCKET)
+	$(LTLIBZ)  $(LTLIBINTL) $(LIBSOCKET) $(LTLIBDL) \
+	$(LTLIBPTHREAD)
 
 if ENABLE_OPENPGP
 libgnutls_la_LIBADD += openpgp/libgnutls_openpgp.la
 libgnutls_la_LIBADD += opencdk/libminiopencdk.la
 endif
 
-#if HAVE_LD_VERSION_SCRIPT
+if HAVE_LD_VERSION_SCRIPT
 libgnutls_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libgnutls.map
-#else
-#libgnutls_la_LDFLAGS += -export-symbols-regex '^(gnutls|_gnutls).*'
-#endif
+else
+libgnutls_la_LDFLAGS += -export-symbols-regex '^(gnutls|_gnutls).*'
+endif
 
 if ENABLE_MINITASN1
 libgnutls_la_LIBADD += minitasn1/libminitasn1.la
@@ -158,12 +153,12 @@ libgnutls_la_LDFLAGS += $(LTLIBGCRYPT)
 libgnutls_la_LIBADD += gcrypt/libcrypto.la
 endif
 
-#if HAVE_LD_OUTPUT_DEF
-#libgnutls_la_LDFLAGS += -Wl,--output-def,libgnutls-$(DLL_VERSION).def
-#defexecdir = $(bindir)
-#defexec_DATA = libgnutls-$(DLL_VERSION).def
-#DISTCLEANFILES += $(defexec_DATA)
-#endif
+if HAVE_LD_OUTPUT_DEF
+libgnutls_la_LDFLAGS += -Wl,--output-def,libgnutls-$(DLL_VERSION).def
+defexecdir = $(bindir)
+defexec_DATA = libgnutls-$(DLL_VERSION).def
+DISTCLEANFILES += $(defexec_DATA)
+endif
 
 # C++ library
 
@@ -181,9 +176,9 @@ libgnutlsxx_la_LDFLAGS = -no-undefined \
 
 libgnutlsxx_la_LIBADD = libgnutls.la
 
-#if HAVE_LD_VERSION_SCRIPT
+if HAVE_LD_VERSION_SCRIPT
 libgnutlsxx_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libgnutlsxx.map
-#endif
+endif
 endif
 
 pkix_asn1_tab.c: pkix.asn

@@ -1038,14 +1038,11 @@ _decode_pkcs8_dsa_key (ASN1_TYPE pkcs8_asn, gnutls_x509_privkey_t pkey)
   _gnutls_mpi_powm (pkey->params[3], pkey->params[2], pkey->params[4],
                     pkey->params[0]);
 
-  if (!pkey->crippled)
+  ret = _gnutls_asn1_encode_dsa (&pkey->key, pkey->params);
+  if (ret < 0)
     {
-      ret = _gnutls_asn1_encode_dsa (&pkey->key, pkey->params);
-      if (ret < 0)
-        {
-          gnutls_assert ();
-          goto error;
-        }
+      gnutls_assert ();
+      goto error;
     }
 
   pkey->params_size = DSA_PRIVATE_PARAMS;
@@ -1256,7 +1253,7 @@ read_pbkdf2_params (ASN1_TYPE pbes2_asn,
   ASN1_TYPE pbkdf2_asn = ASN1_TYPE_EMPTY;
   char oid[64];
 
-  memset (params, 0, sizeof (params));
+  memset (params, 0, sizeof (*params));
 
   /* Check the key derivation algorithm
    */
@@ -1349,7 +1346,7 @@ read_pbkdf2_params (ASN1_TYPE pbes2_asn,
   /* We don't read the PRF. We only use the default.
    */
 
-  return 0;
+  result = 0;
 
 error:
   asn1_delete_structure (&pbkdf2_asn);
@@ -1364,7 +1361,7 @@ read_pkcs12_kdf_params (ASN1_TYPE pbes2_asn, struct pbkdf2_params *params)
 {
   int result;
 
-  memset (params, 0, sizeof (params));
+  memset (params, 0, sizeof (*params));
 
   /* read the salt */
   params->salt_size = sizeof (params->salt);
@@ -1490,7 +1487,7 @@ read_pbe_enc_params (ASN1_TYPE pbes2_asn,
   char oid[64];
   const char *eparams;
 
-  memset (params, 0, sizeof (params));
+  memset (params, 0, sizeof (*params));
 
   /* Check the encryption algorithm
    */
@@ -1557,8 +1554,8 @@ read_pbe_enc_params (ASN1_TYPE pbes2_asn,
       goto error;
     }
   _gnutls_hard_log ("IV.size: %d\n", params->iv_size);
-
-  return 0;
+  
+  result = 0;
 
 error:
   asn1_delete_structure (&pbe_asn);

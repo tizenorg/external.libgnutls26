@@ -35,7 +35,6 @@
 #include <gnutls_str.h>
 #include <gnutls_sig.h>
 #include <stdio.h>
-#include <time.h>
 #include <sys/stat.h>
 
 #define datum_append(x, y, z) _gnutls_datum_append_m (x, y, z, gnutls_realloc)
@@ -153,7 +152,7 @@ gnutls_certificate_set_openpgp_key (gnutls_certificate_credentials_t res,
   
   ret =
     gnutls_privkey_import_openpgp (privkey, pkey,
-                                   GNUTLS_PRIVKEY_IMPORT_AUTO_RELEASE);
+                                   GNUTLS_PRIVKEY_IMPORT_COPY);
   if (ret < 0)
     {
       gnutls_privkey_deinit (privkey);
@@ -369,7 +368,7 @@ gnutls_certificate_set_openpgp_key_mem2 (gnutls_certificate_credentials_t res,
   gnutls_openpgp_privkey_t pkey;
   gnutls_openpgp_crt_t crt;
   int ret;
-  gnutls_openpgp_keyid_t keyid;
+  uint8_t keyid[GNUTLS_OPENPGP_KEYID_SIZE];
 
   ret = gnutls_openpgp_privkey_init (&pkey);
   if (ret < 0)
@@ -432,6 +431,7 @@ gnutls_certificate_set_openpgp_key_mem2 (gnutls_certificate_credentials_t res,
   ret = gnutls_certificate_set_openpgp_key (res, crt, pkey);
 
   gnutls_openpgp_crt_deinit (crt);
+  gnutls_openpgp_privkey_deinit (pkey);
 
   return ret;
 }
@@ -725,7 +725,7 @@ int
 _gnutls_openpgp_crt_to_gcert (gnutls_cert * gcert, gnutls_openpgp_crt_t cert)
 {
   int ret;
-  gnutls_openpgp_keyid_t keyid;
+  uint8_t keyid[GNUTLS_OPENPGP_KEYID_SIZE];
   char err_buf[33];
 
   memset (gcert, 0, sizeof (gnutls_cert));

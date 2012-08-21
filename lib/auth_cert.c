@@ -62,9 +62,10 @@ static gnutls_cert *alloc_and_load_x509_certs (gnutls_x509_crt_t * certs,
 static gnutls_privkey_t alloc_and_load_x509_key (gnutls_x509_privkey_t key,
                                                  int deinit);
 
+#ifdef ENABLE_PKCS11
 static gnutls_privkey_t alloc_and_load_pkcs11_key (gnutls_pkcs11_privkey_t
                                                    key, int deinit);
-
+#endif
 
 /* Copies data from a internal certificate struct (gnutls_cert) to 
  * exported certificate struct (cert_auth_info_t)
@@ -117,7 +118,6 @@ _gnutls_copy_certificate_auth_info (cert_auth_info_t info,
   info->ncerts = ncerts;
 
   info->cert_type = cert[0].cert_type;
-  info->sign_algo = cert[0].sign_algo;
 
 #ifdef ENABLE_OPENPGP
   if (cert[0].cert_type == GNUTLS_CRT_OPENPGP)
@@ -568,9 +568,10 @@ call_get_cert_callback (gnutls_session_t session,
               goto cleanup;
             }
         }
-      break;
 #endif
+      break;
     case GNUTLS_PRIVKEY_PKCS11:
+#ifdef ENABLE_PKCS11
       if (st2.key.pkcs11 != NULL)
         {
           local_key =
@@ -582,6 +583,7 @@ call_get_cert_callback (gnutls_session_t session,
               goto cleanup;
             }
         }
+#endif
       break;
     case GNUTLS_PRIVKEY_X509:
       if (st2.key.x509 != NULL)
@@ -613,6 +615,7 @@ cleanup:
             {
               gnutls_x509_crt_deinit (st2.cert.x509[i]);
             }
+          gnutls_free(st2.cert.x509);
         }
     }
   else
@@ -1170,7 +1173,7 @@ _gnutls_proc_openpgp_server_certificate (gnutls_session_t session,
   gnutls_cert *peer_certificate_list = NULL;
   int peer_certificate_list_size = 0;
   gnutls_datum_t tmp, akey = { NULL, 0 };
-  gnutls_openpgp_keyid_t subkey_id;
+  uint8_t subkey_id[GNUTLS_OPENPGP_KEYID_SIZE];
   unsigned int subkey_id_set = 0;
 
   cred = (gnutls_certificate_credentials_t)
@@ -1643,7 +1646,7 @@ _gnutls_proc_cert_client_cert_vrfy (gnutls_session_t session,
       aid.sign_algorithm = pdata[1];
 
       sign_algo = _gnutls_tls_aid_to_sign (&aid);
-      if (sign_algo == GNUTLS_PK_UNKNOWN)
+      if (sign_algo == GNUTLS_SIGN_UNKNOWN)
         {
           gnutls_assert ();
           return GNUTLS_E_UNSUPPORTED_SIGNATURE_ALGORITHM;
@@ -1971,6 +1974,8 @@ alloc_and_load_pgp_key (gnutls_openpgp_privkey_t key, int deinit)
 }
 #endif
 
+#ifdef ENABLE_PKCS11
+
 /* converts the given raw key to gnutls_privkey* and allocates
  * space for it.
  */
@@ -2004,6 +2009,8 @@ alloc_and_load_pkcs11_key (gnutls_pkcs11_privkey_t key, int deinit)
   return local_key;
 }
 
+#endif
+
 void
 _gnutls_selected_certs_deinit (gnutls_session_t session)
 {
@@ -2019,6 +2026,7 @@ _gnutls_selected_certs_deinit (gnutls_session_t session)
       session->internals.selected_cert_list = NULL;
       session->internals.selected_cert_list_length = 0;
 
+      gnutls_privkey_deinit(session->internals.selected_key);
       session->internals.selected_key = NULL;
     }
 
@@ -2069,7 +2077,8 @@ _gnutls_server_select_cert (gnutls_session_t session,
   /* If the callback which retrieves certificate has been set,
    * use it and leave.
    */
-  if (cred->server_get_cert_callback != NULL)
+  if (cred->server_get_cert_callback != NULL ||
+    cred->get_cert_callback != NULL)
     return call_get_cert_callback (session, NULL, 0, NULL, 0);
 
   /* Otherwise... */

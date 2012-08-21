@@ -1,7 +1,7 @@
 # English translations for libgnutls package.
-# Copyright (C) 2011 Free Software Foundation, Inc.
+# Copyright (C) 2012 Free Software Foundation, Inc.
 # This file is distributed under the same license as the libgnutls package.
-# Automatically generated, 2011.
+# Automatically generated, 2012.
 #
 # All this catalog "translates" are quotation characters.
 # The msgids must be ASCII and therefore cannot contain real quotation
@@ -30,13 +30,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: libgnutls 2.11.7\n"
+"Project-Id-Version: libgnutls 2.12.20\n"
 "Report-Msgid-Bugs-To: bug-gnutls@gnu.org\n"
-"POT-Creation-Date: 2011-03-31 19:54+0900\n"
-"PO-Revision-Date: 2011-03-21 16:38+0100\n"
+"POT-Creation-Date: 2012-06-10 12:53+0200\n"
+"PO-Revision-Date: 2012-06-10 12:53+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: \n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -570,7 +570,15 @@ msgstr "PKCS #11 error in token"
 msgid "PKCS #11 user error"
 msgstr "PKCS #11 user error"
 
-#: gnutls_errors.c:409
+#: gnutls_errors.c:324
+msgid ""
+"The provided X.509 certificate list is not sorted (in subject to issuer "
+"order)"
+msgstr ""
+"The provided X.509 certificate list is not sorted (in subject to issuer "
+"order)"
+
+#: gnutls_errors.c:411
 msgid "(unknown error code)"
 msgstr "(unknown error code)"
 

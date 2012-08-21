@@ -103,7 +103,7 @@ check_b_mod_n (bigint_t b, bigint_t n)
 inline static int
 check_a_mod_n (bigint_t a, bigint_t n)
 {
-  int ret;
+  int ret, err = 0;
   bigint_t r;
 
   r = _gnutls_mpi_mod (a, n);
@@ -114,10 +114,18 @@ check_a_mod_n (bigint_t a, bigint_t n)
     }
 
   ret = _gnutls_mpi_cmp_ui (r, 0);
+  if (ret == 0) err = 1;
+
+  ret = _gnutls_mpi_cmp_ui (r, 1);
+  if (ret == 0) err = 1;
+
+  _gnutls_mpi_add_ui(r, r, 1);
+  ret = _gnutls_mpi_cmp (r, n);
+  if (ret == 0) err = 1;
 
   _gnutls_mpi_release (&r);
 
-  if (ret == 0)
+  if (err != 0)
     {
       gnutls_assert ();
       return GNUTLS_E_RECEIVED_ILLEGAL_PARAMETER;
@@ -728,7 +736,7 @@ _gnutls_proc_srp_server_kx (gnutls_session_t session, opaque * data,
 {
   uint8_t n_s;
   uint16_t n_g, n_n, n_b;
-  size_t _n_s, _n_g, _n_n, _n_b;
+  size_t _n_g, _n_n, _n_b;
   const uint8_t *data_n;
   const uint8_t *data_g;
   const uint8_t *data_s;
@@ -817,7 +825,6 @@ _gnutls_proc_srp_server_kx (gnutls_session_t session, opaque * data,
   data_b = &data[i];
   i += n_b;
 
-  _n_s = n_s;
   _n_g = n_g;
   _n_n = n_n;
   _n_b = n_b;

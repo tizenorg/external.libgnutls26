@@ -92,12 +92,16 @@ extern "C"
  * @GNUTLS_X509_CRT_LIST_IMPORT_FAIL_IF_EXCEED: Fail if the
  *   certificates in the buffer are more than the space allocated for
  *   certificates. The error code will be %GNUTLS_E_SHORT_MEMORY_BUFFER.
+ * @GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED: Fail if the certificates
+ *   in the buffer are not ordered starting from subject to issuer.
+ *   The error code will be %GNUTLS_E_CERTIFICATE_LIST_UNSORTED.
  *
  * Enumeration of different certificate import flags.
  */
   typedef enum gnutls_certificate_import_flags
   {
-    GNUTLS_X509_CRT_LIST_IMPORT_FAIL_IF_EXCEED = 1
+    GNUTLS_X509_CRT_LIST_IMPORT_FAIL_IF_EXCEED = 1,
+    GNUTLS_X509_CRT_LIST_FAIL_IF_UNSORTED = 2
   } gnutls_certificate_import_flags;
 
   int gnutls_x509_crt_init (gnutls_x509_crt_t * cert);
@@ -507,7 +511,7 @@ extern "C"
  *   unless you know what this means.
  * @GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS: If set a signer in the trusted
  *   list is never checked for expiration or activation.
- * @GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT: Allow only trusted CA
+ * @GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT: Allow trusted CA
  *   certificates that have version 1.  This is the default.
  * @GNUTLS_VERIFY_DO_NOT_ALLOW_X509_V1_CA_CRT: Do not allow trusted CA
  *   certificates that have version 1.  This option is to be used
@@ -706,6 +710,8 @@ extern "C"
   int gnutls_x509_crq_print (gnutls_x509_crq_t crq,
                              gnutls_certificate_print_formats_t format,
                              gnutls_datum_t * out);
+
+  int gnutls_x509_crq_verify (gnutls_x509_crq_t crq, unsigned int flags);
 
   int gnutls_x509_crq_init (gnutls_x509_crq_t * crq);
   void gnutls_x509_crq_deinit (gnutls_x509_crq_t crq);

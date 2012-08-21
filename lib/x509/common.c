@@ -34,7 +34,6 @@
 #include <x509_b64.h>
 #include "x509_int.h"
 #include <common.h>
-#include <time.h>
 
 struct oid2string
 {
@@ -1102,24 +1101,13 @@ _gnutls_x509_write_value (ASN1_TYPE c, const char *root,
                           const gnutls_datum_t * data, int str)
 {
   int result;
-  int asize;
   ASN1_TYPE c2 = ASN1_TYPE_EMPTY;
   gnutls_datum_t val = { NULL, 0 };
-
-  asize = data->size + 16;
 
   if (str)
     {
       /* Convert it to OCTET STRING
        */
-      val.data = gnutls_malloc (asize);
-      if (val.data == NULL)
-        {
-          gnutls_assert ();
-          result = GNUTLS_E_MEMORY_ERROR;
-          goto cleanup;
-        }
-
       if ((result = asn1_create_element
            (_gnutls_get_pkix (), "PKIX1.pkcs-7-Data", &c2)) != ASN1_SUCCESS)
         {
@@ -1153,19 +1141,17 @@ _gnutls_x509_write_value (ASN1_TYPE c, const char *root,
   /* Write the data.
    */
   result = asn1_write_value (c, root, val.data, val.size);
-
-  if (val.data != data->data)
-    _gnutls_free_datum (&val);
-
   if (result != ASN1_SUCCESS)
     {
       gnutls_assert ();
-      return _gnutls_asn2err (result);
+      result = _gnutls_asn2err (result);
+      goto cleanup;
     }
 
-  return 0;
+  result = 0;
 
 cleanup:
+  asn1_delete_structure (&c2);
   if (val.data != data->data)
     _gnutls_free_datum (&val);
   return result;

@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <c-ctype.h>
 
 #include "opencdk.h"
 #include "main.h"
@@ -105,32 +106,6 @@ cdk_strlist_add (cdk_strlist_t * list, const char *string)
   return sl;
 }
 
-
-/**
- * cdk_strlist_next:
- * @root: the opaque string list.
- * @r_str: optional argument to store the string data.
- *
- * Return the next string list node from @root. The optional
- * argument @r_str return the data of the current (!) node.
- **/
-cdk_strlist_t
-cdk_strlist_next (cdk_strlist_t root, const char **r_str)
-{
-  cdk_strlist_t node;
-
-  if (!root)
-    return NULL;
-
-  if (r_str)
-    *r_str = root->d;
-  for (node = root->next; node; node = node->next)
-    return node;
-
-  return NULL;
-}
-
-
 const char *
 _cdk_memistr (const char *buf, size_t buflen, const char *sub)
 {
@@ -139,10 +114,10 @@ _cdk_memistr (const char *buf, size_t buflen, const char *sub)
 
   for (t = (byte *) buf, n = buflen, s = (byte *) sub; n; t++, n--)
     {
-      if (toupper (*t) == toupper (*s))
+      if (c_toupper (*t) == c_toupper (*s))
         {
           for (buf = t++, buflen = n--, s++;
-               n && toupper (*t) == toupper ((byte) * s); t++, s++, n--)
+               n && c_toupper (*t) == c_toupper ((byte) * s); t++, s++, n--)
             ;
           if (!*s)
             return buf;
@@ -172,15 +147,14 @@ _cdk_map_gnutls_error (int err)
 
 /* Remove all trailing white spaces from the string. */
 void
-_cdk_trim_string (char *s, int canon)
+_cdk_trim_string (char *s)
 {
+int len = strlen(s);
   while (s && *s &&
-         (s[strlen (s) - 1] == '\t' ||
-          s[strlen (s) - 1] == '\r' ||
-          s[strlen (s) - 1] == '\n' || s[strlen (s) - 1] == ' '))
-    s[strlen (s) - 1] = '\0';
-  if (canon)
-    strcat (s, "\r\n");
+         (s[len - 1] == '\t' ||
+          s[len - 1] == '\r' ||
+          s[len - 1] == '\n' || s[len - 1] == ' '))
+    s[len - 1] = '\0';
 }
 
 
