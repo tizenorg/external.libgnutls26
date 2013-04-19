@@ -2,7 +2,7 @@ Summary: A TLS protocol implementation
 Name: gnutls
 Version: 2.12.20
 Release: 1
-License: LGPLv2+
+License: LGPLv2.1
 Group: System/Libraries
 BuildRequires: gettext-tools
 BuildRequires: zlib-devel, readline-devel, libtasn1-devel
