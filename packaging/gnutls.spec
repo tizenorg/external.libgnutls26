@@ -47,6 +47,9 @@ make
 
 %install
 rm -fr $RPM_BUILD_ROOT
+mkdir -p %{buildroot}/usr/share/license
+cp COPYING %{buildroot}/usr/share/license/%{name}
+
 %make_install
 
 %remove_docs
@@ -59,6 +62,7 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %files
+/usr/share/license/%{name}
 %manifest libgnutls26.manifest
 %{_libdir}/libgnutls*.so.*
 %{_prefix}/share/locale/*/LC_MESSAGES/libgnutls.mo
