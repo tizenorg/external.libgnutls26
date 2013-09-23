@@ -1,6 +1,6 @@
 Summary: A TLS protocol implementation
 Name: gnutls
-Version: 2.12.20
+Version: 2.12.20_1
 Release: 1
 License: LGPLv2.1
 Group: System/Libraries
@@ -71,3 +71,7 @@ rm -fr $RPM_BUILD_ROOT
 %{_includedir}/*
 %{_libdir}/libgnutls*.so
 %{_libdir}/pkgconfig/*.pc
+
+%changelog
+* Mon Sep 23 2013 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_1
