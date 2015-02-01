@@ -701,26 +701,20 @@ _GL_WARN_ON_USE (getline, "getline is unportable - "
 #if @GNULIB_GETS@
 # if @REPLACE_STDIO_READ_FUNCS@ && @GNULIB_STDIO_H_NONBLOCKING@
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
-# if defined gets
 #   undef gets
 #   define gets rpl_gets
-# endif
 #  endif
 _GL_FUNCDECL_RPL (gets, char *, (char *s) _GL_ARG_NONNULL ((1)));
 _GL_CXXALIAS_RPL (gets, char *, (char *s));
 # else
 _GL_CXXALIAS_SYS (gets, char *, (char *s));
-# if defined gets
 #  undef gets
 # endif
-# endif
-# if defined gets
 _GL_CXXALIASWARN (gets);
 /* It is very rare that the developer ever has full control of stdin,
    so any use of gets warrants an unconditional warning.  Assume it is
    always declared, since it is required by C89.  */
 _GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");
-# endif
 #endif
 
 

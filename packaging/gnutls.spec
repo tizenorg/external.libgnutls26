@@ -1,8 +1,7 @@
 Summary: A TLS protocol implementation
 Name: gnutls
-Version: 2.12.20_2.4.1
+Version: 2.12.20_2.6
 Release: 1
-VCS:     external/libgnutls26#gnutls26_2.12.20-2.2-6-g7aac831308798ae57903fee395dd20fe30a5c6f3
 License: LGPLv2+
 Group: System/Libraries
 BuildRequires: gettext-tools
@@ -11,6 +10,7 @@ BuildRequires: lzo-devel, libtool, automake, autoconf
 BuildRequires: nettle-devel, gmp-devel
 URL: http://www.gnutls.org/
 Source0: %{name}-%{version}.tar.gz
+Patch0: gnutls-gets.patch
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: nettle, gmp
@@ -38,6 +38,7 @@ the GnuTLS library.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 
@@ -76,6 +77,12 @@ rm -fr $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sat Jun 21 2014 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.6
+
+* Tue Jun 06 2014 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.5
+
 * Mon Sep 09 2013 Keunsoon Lee <keunsoon.lee@samsung.com>
 - [Release] Update changelog for gnutls-2.12.20_2.4
 
