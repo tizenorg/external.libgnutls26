@@ -1,8 +1,8 @@
 Summary: A TLS protocol implementation
 Name: gnutls
-Version: 2.12.20
+Version: 2.12.20_2.6
 Release: 1
-License: LGPLv2+
+License: LGPL-2.1+ and GPL-3.0+
 Group: System/Libraries
 BuildRequires: gettext-tools
 BuildRequires: zlib-devel, readline-devel, libtasn1-devel
@@ -10,6 +10,7 @@ BuildRequires: lzo-devel, libtool, automake, autoconf
 BuildRequires: nettle-devel, gmp-devel
 URL: http://www.gnutls.org/
 Source0: %{name}-%{version}.tar.gz
+Patch0: gnutls-gets.patch
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: nettle, gmp
@@ -37,16 +38,23 @@ the GnuTLS library.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 
 rm -f doc/*.info* lib/po/libgnutls26.pot
 
-%configure  --enable-ld-version-script --disable-cxx --without-lzo --with-included-libtasn1 --without-p11-kit
+export GC_SECTIONS_FLAGS="-fdata-sections -ffunction-sections -Wl,--gc-sections"
+export CFLAGS+=" -fvisibility=hidden ${GC_SECTIONS_FLAGS}"
+export CXXFLAGS+=" -fvisibility=hidden -fvisibility-inlines-hidden ${GC_SECTIONS_FLAGS}"
+%configure  --enable-ld-version-script --disable-cxx --without-lzo --with-included-libtasn1 --without-p11-kit --enable-npn
 make
 
 %install
 rm -fr $RPM_BUILD_ROOT
+mkdir -p %{buildroot}/usr/share/license
+cp COPYING %{buildroot}/usr/share/license/%{name}
+cat COPYING.LESSER >> %{buildroot}/usr/share/license/%{name}
 %make_install
 
 %remove_docs
@@ -59,6 +67,8 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %files
+/usr/share/license/%{name}
+%manifest libgnutls26.manifest
 %{_libdir}/libgnutls*.so.*
 %{_prefix}/share/locale/*/LC_MESSAGES/libgnutls.mo
 
@@ -66,3 +76,25 @@ rm -fr $RPM_BUILD_ROOT
 %{_includedir}/*
 %{_libdir}/libgnutls*.so
 %{_libdir}/pkgconfig/*.pc
+
+%changelog
+* Sat Jun 21 2014 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.6
+
+* Tue Jun 06 2014 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.5
+
+* Mon Sep 09 2013 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.4
+
+* Tue May 21 2013 Keunsoon Lee <keunsoon.lee@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.3
+
+* Fri Oct 12 2012 Kwangtae Ko <kwangtae.ko@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.2
+
+* Fri Oct 12 2012 Kwangtae Ko <kwangtae.ko@samsung.com>
+- [Title] Add License Information
+
+* Fri Sep 21 2012 Kwangtae Ko <kwangtae.ko@samsung.com>
+- [Release] Update changelog for gnutls-2.12.20_2.1

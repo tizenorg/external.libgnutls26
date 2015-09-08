@@ -1061,3 +1061,32 @@ test_server_cas (gnutls_session_t session)
     return ret;
   return TEST_SUCCEED;
 }
+
+test_code_t
+test_npn (gnutls_session_t session)
+{
+  int ret;
+  char buf[16];
+  size_t size;
+  unsigned int supported;
+
+  sprintf (prio_str,
+      INIT_STR ALL_CIPHERS ":" ALL_COMP ":" ALL_CERTTYPES
+      ":+VERS-TLS1.0:" ALL_MACS ":" ALL_KX ":%s", rest);
+  _gnutls_priority_set_direct (session, prio_str);
+
+  gnutls_credentials_set (session, GNUTLS_CRD_CERTIFICATE, xcred);
+  gnutls_negotiate_next_protocol (session, "\x06spdy/2\x08http/1.1", 16);
+
+  ret = do_handshake (session);
+  if (ret == TEST_FAILED)
+    return ret;
+
+  size = sizeof (buf);
+  ret = gnutls_get_next_protocol (session, buf, &size, &supported);
+
+  if (ret == 0)
+    return TEST_SUCCEED;
+
+  return TEST_FAILED;
+}

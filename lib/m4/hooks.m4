@@ -298,4 +298,18 @@ fi
       AC_DEFINE([GNUTLS_POINTER_TO_INT_CAST], [])
       ;;
   esac
+
+  # For Tizen NPN
+  AC_MSG_CHECKING([whether to add NPN support for Tizen])
+  AC_ARG_ENABLE(npn,
+    AS_HELP_STRING([--enable-npn], [enable NPN (Next Protocol Negotiation) support for Tizen]),
+    enable_npn=$enableval,
+    enable_npn=no)
+  AC_MSG_RESULT($enable_npn)
+
+  AM_CONDITIONAL(ENABLE_TIZEN_NPN, test x$enable_npn != xno)
+  if test x$enable_npn != xno; then
+    AC_DEFINE([ENABLE_TIZEN_NPN], 1, [Enable NPN support for Tizen])
+  fi
+  # End of Tizen NPN
 ])

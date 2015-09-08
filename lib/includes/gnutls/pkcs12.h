@@ -28,6 +28,10 @@
 
 #include <gnutls/x509.h>
 
+#ifdef __GNUC__
+#pragma GCC visibility push(default)
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -118,6 +122,10 @@ extern "C"
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
 #endif
 
 #endif                          /* GNUTLS_PKCS12_H */

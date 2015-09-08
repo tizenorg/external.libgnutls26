@@ -41,6 +41,10 @@
 #include <ext_safe_renegotiation.h>
 #include <gnutls_num.h>
 
+#ifdef ENABLE_TIZEN_NPN
+#include <ext_npn.h>
+#endif
+
 
 static void _gnutls_ext_unset_resumed_session_data (gnutls_session_t session,
                                                     uint16_t type);
@@ -363,6 +367,12 @@ _gnutls_ext_init (void)
   ret = _gnutls_ext_register (&ext_mod_sig);
   if (ret != GNUTLS_E_SUCCESS)
     return ret;
+
+#ifdef ENABLE_TIZEN_NPN
+  ret = _gnutls_ext_register (&ext_mod_npn);
+  if (ret != GNUTLS_E_SUCCESS)
+    return ret;
+#endif
 
   return GNUTLS_E_SUCCESS;
 }

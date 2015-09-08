@@ -6,6 +6,10 @@
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
+#ifdef __GNUC__
+#pragma GCC visibility push(default)
+#endif
+
 #define GNUTLS_PKCS11_MAX_PIN_LEN 32
 
 /* Token callback function. The callback will be used to
@@ -301,5 +305,9 @@ int gnutls_pkcs11_privkey_export_url (gnutls_pkcs11_privkey_t key,
                                       char **url);
 
 /** @} */
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
 
 #endif

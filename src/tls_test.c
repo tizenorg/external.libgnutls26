@@ -150,6 +150,8 @@ static const TLS_TEST tls_tests[] = {
    "no", "dunno"},
   {"for OpenPGP authentication support (TLS extension)", test_openpgp1,
    "yes", "no", "dunno"},
+  {"for Next Protocol Negotiation support", test_npn,
+   "yes", "no", "dunno"},
   {NULL, NULL, NULL, NULL, NULL}
 };
 

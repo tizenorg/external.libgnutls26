@@ -694,6 +694,10 @@ GNUTLS_2_12
 	gnutls_x509_crq_verify;
 	gnutls_global_set_time_function;
 	gnutls_pkcs11_reinit;
+# ENABLE_TIZEN_NPN
+	gnutls_negotiate_next_protocol;
+	gnutls_get_next_protocol;
+# End of ENABLE_TIZEN_NPN
 } GNUTLS_2_10;
 
 GNUTLS_PRIVATE {

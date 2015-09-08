@@ -778,6 +778,8 @@ GNULIB_CHOWN
 GNULIB_CHDIR
 ENABLE_OPENSSL_FALSE
 ENABLE_OPENSSL_TRUE
+ENABLE_TIZEN_NPN_FALSE
+ENABLE_TIZEN_NPN_TRUE
 ENABLE_SESSION_TICKET_FALSE
 ENABLE_SESSION_TICKET_TRUE
 ENABLE_OPENPGP_FALSE
@@ -964,6 +966,7 @@ enable_extra_pki
 enable_openpgp_authentication
 enable_session_ticket
 enable_cryptodev
+enable_npn
 enable_openssl_compatibility
 enable_ld_version_script
 '
@@ -1619,6 +1622,8 @@ Optional Features:
   --disable-session-ticket
                           disable the SessionTicket extension support
   --enable-cryptodev      enable cryptodev support
+  --enable-npn            enable NPN (Next Protocol Negotiation) support for
+                          Tizen
   --disable-openssl-compatibility
                           disable the OpenSSL compatibility support
   --enable-ld-version-script
@@ -14923,6 +14928,34 @@ $as_echo "#define GNUTLS_POINTER_TO_INT_CAST (long)" >>confdefs.h
       ;;
   esac
 
+  # For Tizen NPN
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to add NPN support for Tizen" >&5
+$as_echo_n "checking whether to add NPN support for Tizen... " >&6; }
+  # Check whether --enable-npn was given.
+if test "${enable_npn+set}" = set; then :
+  enableval=$enable_npn; enable_npn=$enableval
+else
+  enable_npn=no
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_npn" >&5
+$as_echo "$enable_npn" >&6; }
+
+   if test x$enable_npn != xno; then
+  ENABLE_TIZEN_NPN_TRUE=
+  ENABLE_TIZEN_NPN_FALSE='#'
+else
+  ENABLE_TIZEN_NPN_TRUE='#'
+  ENABLE_TIZEN_NPN_FALSE=
+fi
+
+  if test x$enable_npn != xno; then
+
+$as_echo "#define ENABLE_TIZEN_NPN 1" >>confdefs.h
+
+  fi
+  # End of Tizen NPN
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
 $as_echo_n "checking for inline... " >&6; }
 if ${ac_cv_c_inline+:} false; then :
@@ -16031,6 +16064,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_SESSION_TICKET_TRUE}" && test -z "${ENABLE_SESSION_TICKET_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_SESSION_TICKET\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_TIZEN_NPN_TRUE}" && test -z "${ENABLE_TIZEN_NPN_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_TIZEN_NPN\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_OPENSSL_TRUE}" && test -z "${ENABLE_OPENSSL_FALSE}"; then

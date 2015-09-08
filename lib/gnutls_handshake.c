@@ -57,6 +57,10 @@
 #include <auth_psk.h>           /* for gnutls_psk_server_credentials_t */
 #include <random.h>
 
+#ifdef ENABLE_TIZEN_NPN
+#include <ext_npn.h>
+#endif
+
 #ifdef HANDSHAKE_DEBUG
 #define ERR(x, y) _gnutls_handshake_log("HSK[%p]: %s (%d)\n", session, x,y)
 #else
@@ -1797,7 +1801,7 @@ _gnutls_read_server_hello (gnutls_session_t session,
   DECR_LEN (len, 1);
   session_id_len = data[pos++];
 
-  if (len < session_id_len)
+  if (len < session_id_len || session_id_len > TLS_MAX_SESSION_ID_SIZE)
     {
       gnutls_assert ();
       return GNUTLS_E_UNSUPPORTED_VERSION_PACKET;
@@ -2892,6 +2896,20 @@ _gnutls_send_handshake_final (gnutls_session_t session, int init)
           return ret;
         }
 
+#ifdef ENABLE_TIZEN_NPN
+    case STATE80:
+      if (session->security_parameters.entity == GNUTLS_CLIENT)
+        {
+          ret = _gnutls_send_next_protocol (session, AGAIN (STATE80));
+          STATE = STATE80;
+          if (ret < 0)
+            {
+              gnutls_assert ();
+              return ret;
+            }
+        }
+#endif
+
     case STATE22:
       /* send the finished message */
       ret = _gnutls_send_finished (session, AGAIN (STATE22));
@@ -2951,6 +2969,20 @@ _gnutls_recv_handshake_final (gnutls_session_t session, int init)
           gnutls_assert ();
           return ret;
         }
+
+#ifdef ENABLE_TIZEN_NPN
+    case STATE80:
+      if (session->security_parameters.entity == GNUTLS_SERVER)
+        {
+          ret = _gnutls_recv_next_protocol (session);
+          STATE = STATE80;
+          if (ret < 0)
+            {
+              gnutls_assert ();
+              return ret;
+            }
+        }
+#endif
 
     case STATE31:
       ret = _gnutls_recv_finished (session);

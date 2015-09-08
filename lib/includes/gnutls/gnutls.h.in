@@ -37,6 +37,10 @@
 #ifndef GNUTLS_H
 #define GNUTLS_H
 
+#ifdef __GNUC__
+#pragma GCC visibility push(default)
+#endif
+
 /* Get size_t. */
 #include <stddef.h>
 /* Get ssize_t. */
@@ -390,6 +394,7 @@ extern "C"
    * @GNUTLS_HANDSHAKE_CLIENT_KEY_EXCHANGE: Client key exchange.
    * @GNUTLS_HANDSHAKE_FINISHED: Finished.
    * @GNUTLS_HANDSHAKE_SUPPLEMENTAL: Supplemental.
+   * @GNUTLS_HANDSHAKE_NEXT_PROTOCOL: Next Protocol Negotiation result
    *
    * Enumeration of different TLS handshake packets.
    */
@@ -406,7 +411,9 @@ extern "C"
     GNUTLS_HANDSHAKE_CERTIFICATE_VERIFY = 15,
     GNUTLS_HANDSHAKE_CLIENT_KEY_EXCHANGE = 16,
     GNUTLS_HANDSHAKE_FINISHED = 20,
-    GNUTLS_HANDSHAKE_SUPPLEMENTAL = 23
+    GNUTLS_HANDSHAKE_SUPPLEMENTAL = 23,
+    /* added for ENABLE_TIZEN_NPN */
+    GNUTLS_HANDSHAKE_NEXT_PROTOCOL = 67
   } gnutls_handshake_description_t;
 
   /**
@@ -872,6 +879,15 @@ extern "C"
   int gnutls_session_ticket_enable_client (gnutls_session_t session);
   int gnutls_session_ticket_enable_server (gnutls_session_t session,
                                            const gnutls_datum_t * key);
+
+  /* Next protocol negotiation for ENABLE_TIZEN_NPN */
+  int gnutls_negotiate_next_protocol (gnutls_session_t session,
+                                      const void *protocols,
+                                      size_t protocols_length);
+  int gnutls_get_next_protocol (gnutls_session_t session,
+                                void *protocol, size_t *protocol_length,
+                                unsigned int *supported);
+  /* End of ENABLE_TIZEN_NPN */
 
 /* if you just want some defaults, use the following.
  */
@@ -1773,5 +1789,9 @@ extern "C"
 #endif
 
 #include <gnutls/compat.h>
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
 
 #endif                          /* GNUTLS_H */

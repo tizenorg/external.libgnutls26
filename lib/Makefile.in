@@ -64,21 +64,22 @@ host_triplet = @host@
 @ENABLE_PKCS11_TRUE@am__append_5 = pkcs11.c pkcs11_privkey.c pkcs11_write.c pkcs11_secret.c
 @ENABLE_NETTLE_TRUE@am__append_6 = nettle
 @ENABLE_NETTLE_FALSE@am__append_7 = gcrypt
-@ENABLE_PKCS11_TRUE@am__append_8 = pkcs11_int.h
-@ENABLE_OPENPGP_TRUE@am__append_9 = openpgp/libgnutls_openpgp.la \
+@ENABLE_TIZEN_NPN_TRUE@am__append_8 = ext_npn.c ext_npn.h
+@ENABLE_PKCS11_TRUE@am__append_9 = pkcs11_int.h
+@ENABLE_OPENPGP_TRUE@am__append_10 = openpgp/libgnutls_openpgp.la \
 @ENABLE_OPENPGP_TRUE@	opencdk/libminiopencdk.la
-@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_10 = -Wl,--version-script=$(srcdir)/libgnutls.map
-@HAVE_LD_VERSION_SCRIPT_FALSE@am__append_11 = -export-symbols-regex '^(gnutls|_gnutls).*'
-@ENABLE_MINITASN1_TRUE@am__append_12 = minitasn1/libminitasn1.la
-@ENABLE_MINITASN1_FALSE@am__append_13 = $(LTLIBTASN1)
-@ENABLE_NETTLE_TRUE@am__append_14 = $(LTLIBNETTLE) $(NETTLE_LIBS)
-@ENABLE_NETTLE_TRUE@am__append_15 = nettle/libcrypto.la
-@ENABLE_NETTLE_FALSE@am__append_16 = $(LTLIBGCRYPT)
-@ENABLE_NETTLE_FALSE@am__append_17 = gcrypt/libcrypto.la
-@HAVE_LD_OUTPUT_DEF_TRUE@am__append_18 = -Wl,--output-def,libgnutls-$(DLL_VERSION).def
-@HAVE_LD_OUTPUT_DEF_TRUE@am__append_19 = $(defexec_DATA)
-@ENABLE_CXX_TRUE@am__append_20 = libgnutlsxx.la
-@ENABLE_CXX_TRUE@@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_21 = -Wl,--version-script=$(srcdir)/libgnutlsxx.map
+@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_11 = -Wl,--version-script=$(srcdir)/libgnutls.map
+@HAVE_LD_VERSION_SCRIPT_FALSE@am__append_12 = -export-symbols-regex '^(gnutls|_gnutls).*'
+@ENABLE_MINITASN1_TRUE@am__append_13 = minitasn1/libminitasn1.la
+@ENABLE_MINITASN1_FALSE@am__append_14 = $(LTLIBTASN1)
+@ENABLE_NETTLE_TRUE@am__append_15 = $(LTLIBNETTLE) $(NETTLE_LIBS)
+@ENABLE_NETTLE_TRUE@am__append_16 = nettle/libcrypto.la
+@ENABLE_NETTLE_FALSE@am__append_17 = $(LTLIBGCRYPT)
+@ENABLE_NETTLE_FALSE@am__append_18 = gcrypt/libcrypto.la
+@HAVE_LD_OUTPUT_DEF_TRUE@am__append_19 = -Wl,--output-def,libgnutls-$(DLL_VERSION).def
+@HAVE_LD_OUTPUT_DEF_TRUE@am__append_20 = $(defexec_DATA)
+@ENABLE_CXX_TRUE@am__append_21 = libgnutlsxx.la
+@ENABLE_CXX_TRUE@@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_22 = -Wl,--version-script=$(srcdir)/libgnutlsxx.map
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -190,8 +191,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libgnutls_la_DEPENDENCIES = gl/liblgnu.la x509/libgnutls_x509.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(am__append_9) \
-	$(am__append_12) $(am__append_15) $(am__append_17)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(am__append_10) \
+	$(am__append_13) $(am__append_16) $(am__append_18)
 am__libgnutls_la_SOURCES_DIST = abstract_int.h debug.h \
 	gnutls_compress.h gnutls_cipher.h gnutls_buffers.h \
 	gnutls_errors.h gnutls_int.h gnutls_handshake.h gnutls_num.h \
@@ -226,16 +227,17 @@ am__libgnutls_la_SOURCES_DIST = abstract_int.h debug.h \
 	crypto.c random.c ext_signature.c cryptodev.c system.c \
 	crypto-api.c ext_safe_renegotiation.c gnutls_privkey.c \
 	gnutls_pubkey.c locks.c pkcs11.c pkcs11_privkey.c \
-	pkcs11_write.c pkcs11_secret.c ext_srp.c gnutls_srp.c \
-	auth_srp.c auth_srp_passwd.c auth_srp_sb64.c auth_srp_rsa.c \
-	auth_psk.c auth_psk_passwd.c gnutls_psk.c auth_dhe_psk.c \
-	gnutls_psk_netconf.c ext_session_ticket.c gnutls.asn pkix.asn \
-	libgnutls.map
+	pkcs11_write.c pkcs11_secret.c ext_npn.c ext_npn.h ext_srp.c \
+	gnutls_srp.c auth_srp.c auth_srp_passwd.c auth_srp_sb64.c \
+	auth_srp_rsa.c auth_psk.c auth_psk_passwd.c gnutls_psk.c \
+	auth_dhe_psk.c gnutls_psk_netconf.c ext_session_ticket.c \
+	gnutls.asn pkix.asn libgnutls.map
 am__objects_1 =
 am__objects_2 = $(am__objects_1)
 @ENABLE_PKCS11_TRUE@am__objects_3 = pkcs11.lo pkcs11_privkey.lo \
 @ENABLE_PKCS11_TRUE@	pkcs11_write.lo pkcs11_secret.lo
-am__objects_4 = gnutls_record.lo gnutls_compress.lo debug.lo \
+@ENABLE_TIZEN_NPN_TRUE@am__objects_4 = ext_npn.lo
+am__objects_5 = gnutls_record.lo gnutls_compress.lo debug.lo \
 	gnutls_cipher.lo gnutls_mbuffers.lo gnutls_buffers.lo \
 	gnutls_handshake.lo gnutls_num.lo gnutls_errors.lo \
 	gnutls_algorithms.lo gnutls_dh.lo gnutls_kx.lo \
@@ -253,14 +255,14 @@ am__objects_4 = gnutls_record.lo gnutls_compress.lo debug.lo \
 	auth_dh_common.lo gnutls_helper.lo gnutls_supplemental.lo \
 	crypto.lo random.lo ext_signature.lo cryptodev.lo system.lo \
 	crypto-api.lo ext_safe_renegotiation.lo gnutls_privkey.lo \
-	gnutls_pubkey.lo locks.lo $(am__objects_3)
-am__objects_5 = ext_srp.lo gnutls_srp.lo auth_srp.lo \
+	gnutls_pubkey.lo locks.lo $(am__objects_3) $(am__objects_4)
+am__objects_6 = ext_srp.lo gnutls_srp.lo auth_srp.lo \
 	auth_srp_passwd.lo auth_srp_sb64.lo auth_srp_rsa.lo
-am__objects_6 = auth_psk.lo auth_psk_passwd.lo gnutls_psk.lo \
+am__objects_7 = auth_psk.lo auth_psk_passwd.lo gnutls_psk.lo \
 	auth_dhe_psk.lo gnutls_psk_netconf.lo
-am__objects_7 = ext_session_ticket.lo
-am_libgnutls_la_OBJECTS = $(am__objects_2) $(am__objects_4) \
-	$(am__objects_5) $(am__objects_6) $(am__objects_7)
+am__objects_8 = ext_session_ticket.lo
+am_libgnutls_la_OBJECTS = $(am__objects_2) $(am__objects_5) \
+	$(am__objects_6) $(am__objects_7) $(am__objects_8)
 libgnutls_la_OBJECTS = $(am_libgnutls_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -1237,8 +1239,8 @@ AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I$(srcdir)/gl \
 # Pkg-config script.
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = gnutls.pc
-DISTCLEANFILES = $(pkgconfig_DATA) $(am__append_19)
-lib_LTLIBRARIES = libgnutls.la $(am__append_20)
+DISTCLEANFILES = $(pkgconfig_DATA) $(am__append_20)
+lib_LTLIBRARIES = libgnutls.la $(am__append_21)
 SRP_COBJECTS = ext_srp.c gnutls_srp.c auth_srp.c auth_srp_passwd.c	\
 	auth_srp_sb64.c auth_srp_rsa.c
 
@@ -1263,7 +1265,7 @@ COBJECTS = gnutls_record.c gnutls_compress.c debug.c gnutls_cipher.c \
 	gnutls_helper.c gnutls_supplemental.c crypto.c random.c \
 	ext_signature.c cryptodev.c system.c crypto-api.c \
 	ext_safe_renegotiation.c gnutls_privkey.c gnutls_pubkey.c \
-	locks.c $(am__append_5)
+	locks.c $(am__append_5) $(am__append_8)
 HFILES = abstract_int.h debug.h gnutls_compress.h gnutls_cipher.h \
 	gnutls_buffers.h gnutls_errors.h gnutls_int.h \
 	gnutls_handshake.h gnutls_num.h gnutls_algorithms.h \
@@ -1280,7 +1282,7 @@ HFILES = abstract_int.h debug.h gnutls_compress.h gnutls_cipher.h \
 	gnutls_supplemental.h crypto.h random.h system.h \
 	ext_session_ticket.h ext_signature.h gnutls_cryptodev.h \
 	ext_safe_renegotiation.h locks.h gnutls_mbuffers.h \
-	$(am__append_8)
+	$(am__append_9)
 
 # Separate so we can create the documentation
 libgnutls_la_SOURCES = $(HFILES) $(COBJECTS) $(SRP_COBJECTS)	\
@@ -1288,13 +1290,13 @@ libgnutls_la_SOURCES = $(HFILES) $(COBJECTS) $(SRP_COBJECTS)	\
 	gnutls.asn pkix.asn libgnutls.map
 
 libgnutls_la_LDFLAGS = -no-undefined -version-info \
-	$(LT_CURRENT):$(LT_REVISION):$(LT_AGE) $(am__append_10) \
-	$(am__append_11) $(am__append_13) $(LTLIBPAKCHOIS) \
-	$(am__append_14) $(am__append_16) $(am__append_18)
+	$(LT_CURRENT):$(LT_REVISION):$(LT_AGE) $(am__append_11) \
+	$(am__append_12) $(am__append_14) $(LTLIBPAKCHOIS) \
+	$(am__append_15) $(am__append_17) $(am__append_19)
 libgnutls_la_LIBADD = gl/liblgnu.la x509/libgnutls_x509.la $(LTLIBZ) \
 	$(LTLIBINTL) $(LIBSOCKET) $(LTLIBDL) $(LTLIBPTHREAD) \
-	$(am__append_9) $(am__append_12) $(am__append_15) \
-	$(am__append_17)
+	$(am__append_10) $(am__append_13) $(am__append_16) \
+	$(am__append_18)
 @HAVE_LD_OUTPUT_DEF_TRUE@defexecdir = $(bindir)
 @HAVE_LD_OUTPUT_DEF_TRUE@defexec_DATA = libgnutls-$(DLL_VERSION).def
 
@@ -1304,7 +1306,7 @@ libgnutls_la_LIBADD = gl/liblgnu.la x509/libgnutls_x509.la $(LTLIBZ) \
 @ENABLE_CXX_TRUE@libgnutlsxx_la_SOURCES = gnutlsxx.cpp libgnutlsxx.map
 @ENABLE_CXX_TRUE@libgnutlsxx_la_LDFLAGS = -no-undefined -version-info \
 @ENABLE_CXX_TRUE@	$(CXX_LT_CURRENT):$(CXX_LT_REVISION):$(CXX_LT_AGE) \
-@ENABLE_CXX_TRUE@	$(am__append_21)
+@ENABLE_CXX_TRUE@	$(am__append_22)
 @ENABLE_CXX_TRUE@libgnutlsxx_la_LIBADD = libgnutls.la
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -1425,6 +1427,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_cert_type.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_max_record.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_npn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_safe_renegotiation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_server_name.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ext_session_ticket.Plo@am__quote@

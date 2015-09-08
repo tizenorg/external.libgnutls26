@@ -66,6 +66,9 @@
 /* enable SRP authentication */
 #undef ENABLE_SRP
 
+/* Enable NPN support for Tizen */
+#undef ENABLE_TIZEN_NPN
+
 /* Define to 1 if the system's ftello function has the Solaris bug. */
 #undef FTELLO_BROKEN_AFTER_SWITCHING_FROM_READ_TO_WRITE
 

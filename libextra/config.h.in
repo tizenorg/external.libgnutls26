@@ -33,6 +33,9 @@
 /* enable SRP authentication */
 #undef ENABLE_SRP
 
+/* Enable NPN support for Tizen */
+#undef ENABLE_TIZEN_NPN
+
 /* Make sure we don't use old features in code. */
 #undef GNUTLS_COMPAT_H
 

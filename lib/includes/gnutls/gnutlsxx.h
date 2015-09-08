@@ -5,6 +5,10 @@
 #include <vector>
 #include <gnutls/gnutls.h>
 
+#ifdef __GNUC__
+#pragma GCC visibility push(default)
+#endif
+
 namespace gnutls
 {
 
@@ -406,5 +410,9 @@ namespace gnutls
 
 
 }                               /* namespace */
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
 
 #endif /* GNUTLSXX_H */

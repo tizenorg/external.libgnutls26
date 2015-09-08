@@ -92,6 +92,10 @@ else
 SUBDIRS += gcrypt
 endif
 
+if ENABLE_TIZEN_NPN
+COBJECTS += ext_npn.c
+endif
+
 HFILES = abstract_int.h debug.h gnutls_compress.h gnutls_cipher.h	\
 	gnutls_buffers.h gnutls_errors.h gnutls_int.h			\
 	gnutls_handshake.h gnutls_num.h gnutls_algorithms.h		\
@@ -111,6 +115,10 @@ HFILES = abstract_int.h debug.h gnutls_compress.h gnutls_cipher.h	\
 
 if ENABLE_PKCS11
 HFILES += pkcs11_int.h
+endif
+
+if ENABLE_TIZEN_NPN
+COBJECTS += ext_npn.h
 endif
 
 # Separate so we can create the documentation

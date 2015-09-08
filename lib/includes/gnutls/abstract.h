@@ -7,6 +7,10 @@
 #include <gnutls/pkcs11.h>
 #include <gnutls/openpgp.h>
 
+#ifdef __GNUC__
+#pragma GCC visibility push(default)
+#endif
+
 /* Public key operations */
 
 struct gnutls_pubkey_st;
@@ -146,5 +150,9 @@ int gnutls_x509_crq_privkey_sign (gnutls_x509_crq_t crq,
                                   gnutls_privkey_t key,
                                   gnutls_digest_algorithm_t dig,
                                   unsigned int flags);
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
 
 #endif
